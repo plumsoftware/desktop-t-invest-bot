@@ -1,11 +1,11 @@
 [versions]
 junit = "4.13.2"
-kotlin = "1.9.24"
+kotlin = "1.9.25"
 kotlinx-coroutines = "1.9.0"
 precompose = "1.6.0"
 material3 = "1.2.1"
-serialization-json = "1.6.0"
-compose = "1.6.10"
+serialization-json = "1.6.3"
+compose = "1.7.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -22,6 +22,7 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version.ref 
 material3 = { module = "org.jetbrains.compose.material3:material3-desktop", version.ref = "material3" }
 
 #Serialization
+serialization-json-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm", version.ref = "serialization-json" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
 
 [plugins]

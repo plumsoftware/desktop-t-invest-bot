@@ -1,9 +1,8 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    alias(libs.plugins.kotlin.serialization)
-
     kotlin("jvm")
+    kotlin("plugin.serialization").version(libs.versions.kotlin)
     id("org.jetbrains.compose")
 }
 
@@ -34,6 +33,7 @@ dependencies {
 
     //Json
     implementation(libs.serialization.json)
+    implementation(libs.serialization.json.jvm)
 
     //Precompose
     api(libs.precompose)
