@@ -1,7 +1,8 @@
-package ru.plumsoftware
+package ru.plumsoftware.ui.presentation
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import ru.plumsoftware.ui.theme.AppTheme
 
 fun main() = run {
     application {
@@ -9,7 +10,9 @@ fun main() = run {
             onCloseRequest = ::exitApplication,
             title = "T инвест бот",
         ) {
+            AppTheme {
 
+            }
         }
     }
 }

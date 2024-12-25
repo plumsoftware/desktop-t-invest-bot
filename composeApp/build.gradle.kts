@@ -49,7 +49,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "ru.plumsoftware.MainKt"
+        mainClass = "ru.plumsoftware.ui.presentation.MainKt"
 
         nativeDistributions {
             targetFormats(
