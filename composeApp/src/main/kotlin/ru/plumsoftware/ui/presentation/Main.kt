@@ -18,6 +18,7 @@ import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
+import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
 import ru.plumsoftware.ui.theme.AppTheme
 
@@ -54,6 +55,12 @@ fun main(): Unit = runBlocking {
                     ) {
                         scene(route = DesktopRouting.home) {
                             MainScreen(
+                                navigator = navigator
+                            )
+                        }
+                        scene(route = DesktopRouting.settings) {
+                            SettingsScreen(
+                                settingsRepository = settingsRepository,
                                 navigator = navigator
                             )
                         }

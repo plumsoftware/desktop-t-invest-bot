@@ -16,7 +16,7 @@ fun PrimaryButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
         enabled = enabled,
         shape = MaterialTheme.shapes.small
     ) {
-        Text(text = text, style = MaterialTheme.typography.headlineSmall)
+        Text(text = text, style = MaterialTheme.typography.headlineMedium)
     }
 }
 
