@@ -59,6 +59,19 @@ class SettingsViewModel(private val settingsRepository: SettingsRepository) : Vi
                     )
                 }
             }
+
+            Event.LoadSettings -> {
+                viewModelScope.launch {
+                    val settings = settingsRepository.getSettings()
+                    model.update {
+                        it.copy(
+                            token = settings.apiTokens.token,
+                            sandboxToken = settings.apiTokens.sandboxToken,
+                            isDark = settings.isDark
+                        )
+                    }
+                }
+            }
         }
     }
 }

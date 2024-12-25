@@ -35,7 +35,7 @@ fun main(): Unit = runBlocking {
 
     application {
 
-        val windowState = rememberWindowState(placement = WindowPlacement.Maximized)
+        val windowState = rememberWindowState(placement = WindowPlacement.Floating)
 
         Window(
             onCloseRequest = ::exitApplication,

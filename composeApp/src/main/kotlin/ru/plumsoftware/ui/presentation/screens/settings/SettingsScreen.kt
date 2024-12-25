@@ -38,6 +38,7 @@ fun SettingsScreen(settingsRepository: SettingsRepository, navigator: Navigator)
     val model = settingsViewModel.model.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
+        settingsViewModel.onEvent(Event.LoadSettings)
         settingsViewModel.effect.collect { effect ->
             when (effect) {
                 Effect.Back -> navigator.goBack()
@@ -48,7 +49,12 @@ fun SettingsScreen(settingsRepository: SettingsRepository, navigator: Navigator)
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "Настройки") },
+                title = {
+                    Text(
+                        text = "Настройки",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     BackButton(
                         onClick = {
@@ -89,6 +95,9 @@ fun SettingsScreen(settingsRepository: SettingsRepository, navigator: Navigator)
                     shape = MaterialTheme.shapes.medium,
                     colors = TextFieldDefaults.outlinedTextFieldColors(),
                     textStyle = MaterialTheme.typography.headlineMedium,
+                    label = {
+                        Text(text = "Токен", style = MaterialTheme.typography.headlineSmall)
+                    },
                     placeholder = {
                         Text(text = "Токен", style = MaterialTheme.typography.headlineSmall)
                     },
@@ -101,6 +110,12 @@ fun SettingsScreen(settingsRepository: SettingsRepository, navigator: Navigator)
                     shape = MaterialTheme.shapes.medium,
                     colors = TextFieldDefaults.outlinedTextFieldColors(),
                     textStyle = MaterialTheme.typography.headlineMedium,
+                    label = {
+                        Text(
+                            text = "Токен песочницы",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    },
                     placeholder = {
                         Text(
                             text = "Токен песочницы",
