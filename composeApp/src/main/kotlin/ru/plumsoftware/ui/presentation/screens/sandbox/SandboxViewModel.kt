@@ -1,6 +1,7 @@
 package ru.plumsoftware.ui.presentation.screens.sandbox
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,6 +15,7 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.tinkoff.piapi.core.InvestApi
+import kotlin.time.Duration.Companion.seconds
 
 class SandboxViewModel(
     private val sandboxRepository: SandboxRepository,
@@ -43,18 +45,23 @@ class SandboxViewModel(
                         val accountId: String =
                             sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
                         sandboxRepository.saveSandboxAccountId(accountId = accountId)
+                        val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
 
                         model.update {
                             it.copy(
                                 accountId = accountId,
-                                sandboxApi = sandboxApi
+                                sandboxApi = sandboxApi,
+                                portfolio = portfolio
                             )
                         }
                     } else {
+                        val portfolio =
+                            sandboxRepository.getPortfolio(sandboxApi, lastSandboxAccountId)
                         model.update {
                             it.copy(
                                 accountId = lastSandboxAccountId,
-                                sandboxApi = sandboxApi
+                                sandboxApi = sandboxApi,
+                                portfolio = portfolio
                             )
                         }
                     }
@@ -81,8 +88,24 @@ class SandboxViewModel(
                     sandboxRepository.addMoney(
                         value = value,
                         sandboxApi = model.value.sandboxApi!!,
-                        model.value.accountId
+                        accountId = model.value.accountId
                     )
+                    viewModelScope.launch(Dispatchers.IO) {
+                        delay(2.seconds)
+                        val portfolio = sandboxRepository.getPortfolio(
+                            model.value.sandboxApi!!,
+                            accountId = model.value.accountId
+                        )
+                        delay(2.seconds)
+                        withContext(Dispatchers.Main) {
+                            model.update {
+                                it.copy(
+                                    portfolio = portfolio,
+                                    moneyValue = ""
+                                )
+                            }
+                        }
+                    }
                 } else {
                     var msg = ""
                     if (value == null)
@@ -104,6 +127,7 @@ class SandboxViewModel(
             model.update {
                 it.copy(
                     accountId = "",
+                    portfolio = null
                 )
             }
         }

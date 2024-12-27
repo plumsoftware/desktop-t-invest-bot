@@ -62,12 +62,8 @@ class SandboxRepositoryImpl : SandboxRepository {
         return sandboxApi.sandboxService.accountsSync
     }
 
-    override fun getPortfolio(sandboxApi: InvestApi, index: Int): Portfolio {
-        val accounts = sandboxApi.userService.accountsSync
-        val mainAccount = accounts[index].id
-
-        //Получаем портфолио
-        val portfolio = sandboxApi.operationsService.getPortfolioSync(mainAccount)
+    override fun getPortfolio(sandboxApi: InvestApi, accountId: String): Portfolio {
+        val portfolio = sandboxApi.operationsService.getPortfolioSync(accountId)
         return portfolio
     }
 

@@ -22,6 +22,7 @@ import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.viewmodel.viewModel
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
+import ru.plumsoftware.ui.components.PortfolioComposable
 import ru.plumsoftware.ui.components.SecondaryButton
 import ru.plumsoftware.ui.components.TertiaryButton
 import ru.plumsoftware.ui.components.TopBar
@@ -79,26 +80,37 @@ fun SandboxScreen(
             ),
             horizontalAlignment = Alignment.Start
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
+                verticalArrangement = Arrangement.spacedBy(
                     space = Space.medium,
-                    alignment = Alignment.Start
-                )
+                    alignment = Alignment.Top
+                ),
+                horizontalAlignment = Alignment.Start
             ) {
-                Text(
-                    text = "Идентификатор вашего аккаунта: ${model.value.accountId}",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.weight(1.0f)
-                )
-                SecondaryButton(
-                    text = "Закрыть все аккаунты",
-                    onClick = {
-                        viewModel.onEvent(Event.CloseAllSandboxAccounts)
-                    }
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = Space.medium,
+                        alignment = Alignment.Start
+                    )
+                ) {
+                    Text(
+                        text = "Идентификатор вашего аккаунта: ${model.value.accountId}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.weight(1.0f)
+                    )
+                    SecondaryButton(
+                        text = "Закрыть все аккаунты",
+                        onClick = {
+                            viewModel.onEvent(Event.CloseAllSandboxAccounts)
+                        }
+                    )
+                }
+                PortfolioComposable(portfolio = model.value.portfolio)
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
