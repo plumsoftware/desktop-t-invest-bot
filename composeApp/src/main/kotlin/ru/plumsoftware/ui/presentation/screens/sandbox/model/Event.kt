@@ -4,4 +4,6 @@ sealed class Event {
     data object Back : Event()
     data object Init : Event()
     data object CloseAllSandboxAccounts : Event()
+
+    data class ChangeMoneyValue(val moneyValue: String) : Event()
 }

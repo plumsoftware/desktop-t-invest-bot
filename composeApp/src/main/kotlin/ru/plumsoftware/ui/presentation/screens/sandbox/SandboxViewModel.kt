@@ -68,6 +68,12 @@ class SandboxViewModel(
                     clearData()
                 }
             }
+
+            is Event.ChangeMoneyValue -> {
+                model.update {
+                    it.copy(moneyValue = event.moneyValue)
+                }
+            }
         }
     }
 

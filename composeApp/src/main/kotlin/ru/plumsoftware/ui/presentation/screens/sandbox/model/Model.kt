@@ -6,5 +6,6 @@ import ru.tinkoff.piapi.core.InvestApi
 data class Model(
     val accountId: String = "",
     val sandboxApi: InvestApi? = null,
-    val snackbarHostState: SnackbarHostState = SnackbarHostState()
+    val snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    val moneyValue: String = ""
 )
