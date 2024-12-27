@@ -74,6 +74,26 @@ class SandboxViewModel(
                     it.copy(moneyValue = event.moneyValue)
                 }
             }
+
+            Event.AddMoney -> {
+                val value = model.value.moneyValue.toIntOrNull()
+                if (value != null && model.value.accountId.isNotEmpty()) {
+                    sandboxRepository.addMoney(
+                        value = value,
+                        sandboxApi = model.value.sandboxApi!!,
+                        model.value.accountId
+                    )
+                } else {
+                    var msg = ""
+                    if (value == null)
+                        msg += "Неверно введена сумма пополнения.\n"
+                    if (model.value.accountId.isEmpty())
+                        msg += "Нет активного ID аккаунта."
+                    viewModelScope.launch {
+                        effect.emit(Effect.ShowSnackbar(msg))
+                    }
+                }
+            }
         }
     }
 

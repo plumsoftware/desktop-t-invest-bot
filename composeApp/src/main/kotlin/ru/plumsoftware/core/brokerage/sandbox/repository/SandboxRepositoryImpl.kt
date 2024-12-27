@@ -5,6 +5,7 @@ import ru.plumsoftware.core.brokerage.sandbox.model.Acc
 import ru.plumsoftware.core.brokerage.sandbox.model.Path
 import ru.plumsoftware.core.brokerage.sandbox.model.SandboxConfig
 import ru.tinkoff.piapi.contract.v1.Account
+import ru.tinkoff.piapi.contract.v1.MoneyValue
 import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Positions
@@ -77,6 +78,13 @@ class SandboxRepositoryImpl : SandboxRepository {
         //Получаем список позиций
         val positions = sandboxApi.operationsService.getPositionsSync(mainAccount)
         return positions
+    }
+
+    override fun addMoney(value: Int, sandboxApi: InvestApi, accountId: String) {
+        sandboxApi.sandboxService.payIn(
+            accountId,
+            MoneyValue.newBuilder().setUnits(value.toLong()).setCurrency("RUB").build()
+        );
     }
 
     private fun encode(sandboxConfig: SandboxConfig): String {

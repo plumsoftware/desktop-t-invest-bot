@@ -125,7 +125,7 @@ fun SandboxScreen(
                 TertiaryButton(
                     text = "Пополнить",
                     onClick = {
-
+                        viewModel.onEvent(Event.AddMoney)
                     }
                 )
             }

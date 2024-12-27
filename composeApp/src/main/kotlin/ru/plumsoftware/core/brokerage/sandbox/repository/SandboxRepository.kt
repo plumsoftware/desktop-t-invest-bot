@@ -20,4 +20,6 @@ interface SandboxRepository {
 
     fun getPortfolio(sandboxApi: InvestApi, index: Int = 0): Portfolio
     fun getPositions(sandboxApi: InvestApi, index: Int = 0): Positions
+
+    fun addMoney(value: Int, sandboxApi: InvestApi, accountId: String)
 }
