@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -22,8 +21,8 @@ import androidx.compose.ui.Modifier
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.viewmodel.viewModel
 import ru.plumsoftware.core.settings.repository.SettingsRepository
-import ru.plumsoftware.ui.components.BackButton
 import ru.plumsoftware.ui.components.PrimaryButton
+import ru.plumsoftware.ui.components.TopBar
 import ru.plumsoftware.ui.presentation.screens.settings.model.Effect
 import ru.plumsoftware.ui.presentation.screens.settings.model.Event
 import ru.plumsoftware.ui.theme.Space
@@ -48,21 +47,7 @@ fun SettingsScreen(settingsRepository: SettingsRepository, navigator: Navigator)
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Настройки",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                navigationIcon = {
-                    BackButton(
-                        onClick = {
-                            settingsViewModel.onEvent(Event.Back)
-                        }
-                    )
-                }
-            )
+            TopBar(title = "Настройки", onBack = { settingsViewModel.onEvent(Event.Back) })
         },
         floatingActionButton = {
             PrimaryButton(

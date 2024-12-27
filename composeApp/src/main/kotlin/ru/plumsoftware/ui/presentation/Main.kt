@@ -16,8 +16,10 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
+import ru.plumsoftware.ui.presentation.screens.sandbox.SandboxScreen
 import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
 import ru.plumsoftware.ui.theme.AppTheme
@@ -25,6 +27,7 @@ import ru.plumsoftware.ui.theme.AppTheme
 fun main(): Unit = runBlocking {
 
     val settingsRepository = SettingsRepositoryImpl()
+    val sandboxRepository = SandboxRepositoryImpl()
     val saveIOContext = Dispatchers.IO + SupervisorJob()
     val scope = CoroutineScope(saveIOContext)
 
@@ -62,6 +65,13 @@ fun main(): Unit = runBlocking {
                             SettingsScreen(
                                 settingsRepository = settingsRepository,
                                 navigator = navigator
+                            )
+                        }
+                        scene(route = DesktopRouting.sandbox) {
+                            SandboxScreen(
+                                navigator = navigator,
+                                settingsRepository = settingsRepository,
+                                sandboxRepository = sandboxRepository
                             )
                         }
                     }
