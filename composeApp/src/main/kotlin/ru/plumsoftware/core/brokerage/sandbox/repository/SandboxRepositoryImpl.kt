@@ -9,7 +9,12 @@ import ru.tinkoff.piapi.contract.v1.MoneyValue
 import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Positions
+import ru.tinkoff.piapi.core.models.Quantity
 import java.io.File
+import java.math.BigDecimal
+import java.util.UUID
+import ru.tinkoff.piapi.contract.v1.*
+
 
 class SandboxRepositoryImpl : SandboxRepository {
 
@@ -81,6 +86,40 @@ class SandboxRepositoryImpl : SandboxRepository {
             accountId,
             MoneyValue.newBuilder().setUnits(value.toLong()).setCurrency("RUB").build()
         );
+    }
+
+    override suspend fun createOrder(sandboxApi: InvestApi, accountId: String, id: String) {
+
+        val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf("figi"))[0].price
+        val minPriceIncrement =
+            sandboxApi.instrumentsService.getInstrumentByFigiSync("figi").minPriceIncrement
+
+        val price = Quantity.ofQuotation(lastPrice)
+            .subtract(
+                Quantity.ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal: BigDecimal ->
+                        minPriceBigDecimal.multiply(
+                            BigDecimal.TEN.multiply(BigDecimal.TEN)
+                        )
+                    }
+            )
+            .toQuotation()
+
+        val orderId = sandboxApi.ordersService
+            .postOrderSync(
+                "figi",
+                1,
+                price,
+                OrderDirection.ORDER_DIRECTION_BUY,
+                accountId,
+                OrderType.ORDER_TYPE_LIMIT,
+                UUID.randomUUID().toString()
+            ).getOrderId()
+    }
+
+    override suspend fun getInstrumentsBy(sandboxApi: InvestApi, id: String): List<InstrumentShort> {
+        val instruments = sandboxApi.instrumentsService.findInstrumentSync(id)
+        return instruments.toList()
     }
 
     private fun encode(sandboxConfig: SandboxConfig): String {

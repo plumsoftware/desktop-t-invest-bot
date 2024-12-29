@@ -14,6 +14,7 @@ import ru.plumsoftware.core.settings.repository.SettingsRepository
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
+import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.core.InvestApi
 import kotlin.time.Duration.Companion.seconds
 
@@ -114,6 +115,20 @@ class SandboxViewModel(
                         msg += "Нет активного ID аккаунта."
                     viewModelScope.launch {
                         effect.emit(Effect.ShowSnackbar(msg))
+                    }
+                }
+            }
+
+            is Event.SearchInstrument -> {
+                viewModelScope.launch {
+                    val instrumentsBy: List<InstrumentShort> = sandboxRepository.getInstrumentsBy(
+                        sandboxApi = model.value.sandboxApi!!,
+                        id = event.id
+                    )
+                    withContext(Dispatchers.Main) {
+                        model.update {
+                            it.copy(instrumentsBy = instrumentsBy)
+                        }
                     }
                 }
             }

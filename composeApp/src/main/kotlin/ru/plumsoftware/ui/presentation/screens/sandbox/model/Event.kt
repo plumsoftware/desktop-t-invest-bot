@@ -7,4 +7,6 @@ sealed class Event {
 
     data class ChangeMoneyValue(val moneyValue: String) : Event()
     data object AddMoney : Event()
+
+    data class SearchInstrument(val id: String) : Event()
 }
