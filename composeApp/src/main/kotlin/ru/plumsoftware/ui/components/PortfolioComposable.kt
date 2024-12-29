@@ -49,7 +49,7 @@ fun PortfolioComposable(portfolio: Portfolio?) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 with(portfolio.totalAmountPortfolio) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма портфеля ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium
@@ -75,35 +75,35 @@ fun PortfolioComposable(portfolio: Portfolio?) {
             }
             if (expanded) {
                 with(portfolio.totalAmountBonds) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма облигаций ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 with(portfolio.totalAmountEtfs) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма фондов ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 with(portfolio.totalAmountFutures) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма фьючерсов ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 with(portfolio.totalAmountShares) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма акций ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 with(portfolio.totalAmountCurrencies) {
-                    val percent = value.toLong() / total * 100
+                    val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма валют ${value.toLong()} $currency ($percent%)",
                         style = MaterialTheme.typography.bodyMedium

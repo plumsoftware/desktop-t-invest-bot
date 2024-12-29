@@ -52,6 +52,11 @@ val typography = Typography(
         fontSize = 20.sp,
         fontWeight = FontWeight.Medium
     ),
+    bodyLarge = TextStyle(
+        fontFamily = fontFamily,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Normal
+    ),
     bodyMedium = TextStyle(
         fontFamily = fontFamily,
         fontSize = 16.sp,

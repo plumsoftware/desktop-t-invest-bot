@@ -34,7 +34,7 @@ fun MainScreen(navigator: Navigator) {
                 }
 
                 Effect.OpenSandbox -> {
-                    navigator.navigate(route = DesktopRouting.sandbox)
+                    navigator.navigate(route = DesktopRouting.selectSandboxAccountId)
                 }
 
                 Effect.OpenSettings -> {

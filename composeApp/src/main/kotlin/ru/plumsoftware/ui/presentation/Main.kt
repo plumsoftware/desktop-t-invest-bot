@@ -18,6 +18,7 @@ import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
+import ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.SelectSandboxAccount
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
 import ru.plumsoftware.ui.presentation.screens.sandbox.SandboxScreen
 import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
@@ -48,7 +49,6 @@ fun main(): Unit = runBlocking {
             PreComposeApp {
                 val navigator = rememberNavigator()
 
-
                 AppTheme(useDarkTheme = isDark) {
                     NavHost(
                         navigator = navigator,
@@ -71,7 +71,14 @@ fun main(): Unit = runBlocking {
                             SandboxScreen(
                                 navigator = navigator,
                                 settingsRepository = settingsRepository,
-                                sandboxRepository = sandboxRepository
+                                sandboxRepository = sandboxRepository,
+                            )
+                        }
+                        scene(route = DesktopRouting.selectSandboxAccountId) {
+                            SelectSandboxAccount(
+                                navigator = navigator,
+                                sandboxRepository = sandboxRepository,
+                                settingsRepository = settingsRepository,
                             )
                         }
                     }

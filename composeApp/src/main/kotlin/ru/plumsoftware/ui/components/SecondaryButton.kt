@@ -17,6 +17,6 @@ fun SecondaryButton(text: String, enabled: Boolean = true, onClick: () -> Unit) 
         shape = MaterialTheme.shapes.small,
         contentPadding = PaddingValues(horizontal = Space.medium, vertical = Space.small)
     ) {
-        Text(text = text, style = MaterialTheme.typography.headlineSmall)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge)
     }
 }

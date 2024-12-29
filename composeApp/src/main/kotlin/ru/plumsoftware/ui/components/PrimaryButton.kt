@@ -19,7 +19,7 @@ fun PrimaryButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
         shape = MaterialTheme.shapes.medium,
         contentPadding = PaddingValues(horizontal = Space.medium, vertical = Space.small)
     ) {
-        Text(text = text, style = MaterialTheme.typography.headlineMedium)
+        Text(text = text, style = MaterialTheme.typography.headlineSmall)
     }
 }
 
