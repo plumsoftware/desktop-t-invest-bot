@@ -185,3 +185,5 @@ internal val darkScheme = darkColorScheme(
     inverseOnSurface = inverseOnSurfaceDark,
     inversePrimary = inversePrimaryDark,
 )
+
+fun Color.disabled() : Color = this.copy(alpha = 0.5f)
