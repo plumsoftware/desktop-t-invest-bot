@@ -35,6 +35,9 @@ dependencies {
     implementation(libs.serialization.json)
     implementation(libs.serialization.json.jvm)
 
+    //Cbor
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.6.3")
+
     //Precompose
     api(libs.precompose)
     api(libs.precompose.molecule)
