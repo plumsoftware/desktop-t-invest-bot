@@ -122,6 +122,34 @@ class SandboxRepositoryImpl : SandboxRepository {
         return instruments.toList()
     }
 
+    override suspend fun buyWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String) {
+        val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
+        println("lastPrice: $lastPrice")
+        val minPriceIncrement =
+            sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
+        println("min price: $minPriceIncrement")
+
+        val price = Quantity.ofQuotation(lastPrice)
+            .subtract(
+                Quantity.ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal: BigDecimal ->
+                        minPriceBigDecimal.multiply(
+                            BigDecimal.TEN.multiply(BigDecimal.TEN)
+                        )
+                    }
+            )
+            .toQuotation()
+        println("price: $price")
+
+//        var orderId = sandboxApi.ordersService
+//            .postOrderSync(figi, 1, price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
+//                UUID.randomUUID().toString()).getOrderId()
+    }
+
+    override suspend fun sellWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String) {
+        TODO("Not yet implemented")
+    }
+
     private fun encode(sandboxConfig: SandboxConfig): String {
         val stringBuffer = StringBuffer()
         stringBuffer

@@ -16,6 +16,7 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Position
 import kotlin.time.Duration.Companion.seconds
 
 class SandboxViewModel(
@@ -47,22 +48,26 @@ class SandboxViewModel(
                             sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
                         sandboxRepository.saveSandboxAccountId(accountId = accountId)
                         val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
+                        val positions: MutableList<Position> = portfolio.positions
 
                         model.update {
                             it.copy(
                                 accountId = accountId,
                                 sandboxApi = sandboxApi,
-                                portfolio = portfolio
+                                portfolio = portfolio,
+                                positions = positions
                             )
                         }
                     } else {
                         val portfolio =
                             sandboxRepository.getPortfolio(sandboxApi, lastSandboxAccountId)
+                        val positions: MutableList<Position> = portfolio.positions
                         model.update {
                             it.copy(
                                 accountId = lastSandboxAccountId,
                                 sandboxApi = sandboxApi,
-                                portfolio = portfolio
+                                portfolio = portfolio,
+                                positions = positions
                             )
                         }
                     }
@@ -130,6 +135,32 @@ class SandboxViewModel(
                             it.copy(instrumentsBy = instrumentsBy)
                         }
                     }
+                }
+            }
+
+            is Event.BuyLot -> {
+
+            }
+            is Event.BuyWithMoney -> {
+                viewModelScope.launch {
+                    sandboxRepository.buyWithMoney(
+                        sandboxApi = model.value.sandboxApi!!,
+                        money = event.money,
+                        accountId = model.value.accountId,
+                        figi = model.value.selectedFigi
+                    )
+                }
+            }
+            is Event.SellLot -> {
+
+            }
+            is Event.SellWithMoney -> {
+
+            }
+
+            is Event.SelectInstrument -> {
+                model.update {
+                    it.copy(selectedFigi = event.figi)
                 }
             }
         }

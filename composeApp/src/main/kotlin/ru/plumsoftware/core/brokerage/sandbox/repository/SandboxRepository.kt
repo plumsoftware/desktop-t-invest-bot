@@ -27,4 +27,7 @@ interface SandboxRepository {
 
     suspend fun createOrder(sandboxApi: InvestApi, accountId: String, id: String)
     suspend fun getInstrumentsBy(sandboxApi: InvestApi, id: String): List<InstrumentShort>
+
+    suspend fun buyWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
+    suspend fun sellWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
 }

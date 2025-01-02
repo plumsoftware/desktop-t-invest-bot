@@ -9,4 +9,12 @@ sealed class Event {
     data object AddMoney : Event()
 
     data class SearchInstrument(val id: String) : Event()
+
+    data class SelectInstrument(val figi: String) : Event()
+
+    data class BuyWithMoney(val money: String) : Event()
+    data class SellWithMoney(val money: String) : Event()
+
+    data class BuyLot(val lot: String) : Event()
+    data class SellLot(val lot: String) : Event()
 }
