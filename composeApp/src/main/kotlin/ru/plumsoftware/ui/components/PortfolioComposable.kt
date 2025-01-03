@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Icon
@@ -12,7 +13,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,11 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
+import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.plumsoftware.ui.theme.Space
-import ru.tinkoff.piapi.core.models.Portfolio
 
 @Composable
-fun PortfolioComposable(portfolio: Portfolio?) {
+fun PortfolioComposable(model: State<Model>, onEvent: (Event) -> Unit) {
+
+    val portfolio = model.value.portfolio
 
     if (portfolio != null) {
         val total = portfolio.totalAmountPortfolio.value.toLong()
@@ -70,6 +77,44 @@ fun PortfolioComposable(portfolio: Portfolio?) {
                         imageVector = Icons.Rounded.ArrowDropDown,
                         contentDescription = "Развернуть портфель",
                         modifier = Modifier.rotate(if (expanded) 180f else 0f)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = Space.medium,
+                        alignment = Alignment.Start
+                    )
+                ) {
+
+                    TextField(
+                        value = model.value.moneyValue,
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.wrapContentWidth(),
+                        maxLines = 1,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.Transparent
+                        ),
+                        textStyle = MaterialTheme.typography.headlineSmall,
+                        label = {
+                            Text(text = "Сумма", style = MaterialTheme.typography.headlineSmall)
+                        },
+                        onValueChange = { text ->
+                            if (text.length <= 10)
+                                onEvent(Event.ChangeMoneyValue(moneyValue = text))
+                        },
+                        trailingIcon = {
+                            Text(text = "₽", style = MaterialTheme.typography.headlineSmall)
+                        }
+                    )
+
+                    PrimaryTextButton(
+                        text = "Пополнить",
+                        enabled = model.value.moneyValue.isNotEmpty(),
+                        onClick = {
+                            onEvent(Event.AddMoney)
+                        }
                     )
                 }
             }

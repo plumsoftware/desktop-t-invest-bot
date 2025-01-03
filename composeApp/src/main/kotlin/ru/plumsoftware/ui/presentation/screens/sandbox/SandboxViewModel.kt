@@ -40,35 +40,44 @@ class SandboxViewModel(
                     val settings = settingsRepository.getSettings()
                     val lastSandboxAccountId: String = sandboxRepository.getLastSandboxAccountId()
 
-                    val sandboxApi: InvestApi =
+                    val sandboxApi: InvestApi? = if (model.value.sandboxApi == null)
                         sandboxRepository.getSandboxApi(settings.apiTokens.sandboxToken)
+                    else
+                        model.value.sandboxApi
 
                     if (lastSandboxAccountId.isEmpty()) {
-                        val accountId: String =
-                            sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
-                        sandboxRepository.saveSandboxAccountId(accountId = accountId)
-                        val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
-                        val positions: MutableList<Position> = portfolio.positions.reversed().toMutableList()
+                        if (sandboxApi != null) {
+                            val accountId: String =
+                                sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
+                            sandboxRepository.saveSandboxAccountId(accountId = accountId)
+                            val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
+                            val positions: MutableList<Position> =
+                                portfolio.positions
+                                    .reversed()
+                                    .toMutableList()
 
-                        model.update {
-                            it.copy(
-                                accountId = accountId,
-                                sandboxApi = sandboxApi,
-                                portfolio = portfolio,
-                                positions = positions
-                            )
+                            model.update {
+                                it.copy(
+                                    accountId = accountId,
+                                    sandboxApi = sandboxApi,
+                                    portfolio = portfolio,
+                                    positions = positions
+                                )
+                            }
                         }
                     } else {
-                        val portfolio =
-                            sandboxRepository.getPortfolio(sandboxApi, lastSandboxAccountId)
-                        val positions: MutableList<Position> = portfolio.positions
-                        model.update {
-                            it.copy(
-                                accountId = lastSandboxAccountId,
-                                sandboxApi = sandboxApi,
-                                portfolio = portfolio,
-                                positions = positions
-                            )
+                        if (sandboxApi != null) {
+                            val portfolio =
+                                sandboxRepository.getPortfolio(sandboxApi, lastSandboxAccountId)
+                            val positions: MutableList<Position> = portfolio.positions
+                            model.update {
+                                it.copy(
+                                    accountId = lastSandboxAccountId,
+                                    sandboxApi = sandboxApi,
+                                    portfolio = portfolio,
+                                    positions = positions
+                                )
+                            }
                         }
                     }
                 }
@@ -162,6 +171,8 @@ class SandboxViewModel(
                             figi = model.value.selectedFigi
                         )
                     }
+
+                updatePortfolio()
             }
 
             is Event.BuyWithMoney -> {
@@ -204,10 +215,25 @@ class SandboxViewModel(
         }
     }
 
-    fun getInstrumentNameByFigi(figi: String) : String {
+    fun getInstrumentNameByFigi(figi: String): String {
         val sandboxApi = model.value.sandboxApi
         return if (sandboxApi != null) {
             sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).name
         } else "Неопределено"
+    }
+
+    private fun updatePortfolio() {
+        val sandboxApi = model.value.sandboxApi
+        if (sandboxApi != null) {
+            val portfolio =
+                sandboxRepository.getPortfolio(sandboxApi, model.value.accountId)
+            val positions: MutableList<Position> = portfolio.positions
+            model.update {
+                it.copy(
+                    portfolio = portfolio,
+                    positions = positions
+                )
+            }
+        }
     }
 }

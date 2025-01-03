@@ -1,17 +1,20 @@
 package ru.plumsoftware.ui.presentation.screens.sandbox
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,9 +50,14 @@ fun SandboxScreen(
         )
     }
     val model = viewModel.model.collectAsState()
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(key1 = selectedTabIndex) {
+        if (selectedTabIndex == 0)
+            viewModel.onEvent(Event.Init)
+    }
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.onEvent(Event.Init)
         viewModel.effect.collect { effect ->
             when (effect) {
                 Effect.Back -> {
@@ -69,6 +77,54 @@ fun SandboxScreen(
         },
         topBar = {
             TopBar(title = "Песочница", onBack = { viewModel.onEvent(Event.Back) })
+        },
+        bottomBar = {
+            BottomAppBar(
+                icons = {
+                    Box(
+                        modifier = Modifier.weight(1.0f)
+                    ) {
+                        IconButton(
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = {
+                                selectedTabIndex = 0
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Rounded.Person, contentDescription = "Профиль")
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.weight(1.0f)
+                    ) {
+                        IconButton(
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = {
+                                selectedTabIndex = 1
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Build,
+                                contentDescription = "Инструменты"
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.weight(1.0f)
+                    ) {
+                        IconButton(
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = {
+                                selectedTabIndex = 2
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.PlayArrow,
+                                contentDescription = "Торги в песочнице"
+                            )
+                        }
+                    }
+                }
+            )
         }
     ) {
         Column(
@@ -82,41 +138,6 @@ fun SandboxScreen(
             ),
             horizontalAlignment = Alignment.Start
         ) {
-            var selectedTabIndex by remember { mutableIntStateOf(0) }
-
-            TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    text = {
-                        Text(
-                            text = "Счёт и портфолио",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    },
-                    onClick = {
-                        selectedTabIndex = 0
-                    },
-                )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    text = {
-                        Text(text = "Инструменты", style = MaterialTheme.typography.headlineSmall)
-                    },
-                    onClick = {
-                        selectedTabIndex = 1
-                    }
-                )
-                Tab(
-                    selected = selectedTabIndex == 2,
-                    text = {
-                        Text(text = "Торги", style = MaterialTheme.typography.headlineSmall)
-                    },
-                    onClick = {
-                        selectedTabIndex = 2
-                    }
-                )
-            }
-
             if (selectedTabIndex == 0) {
                 PortfolioTab(
                     model = model,
