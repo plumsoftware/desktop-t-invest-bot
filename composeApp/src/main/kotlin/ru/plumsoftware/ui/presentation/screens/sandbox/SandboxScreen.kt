@@ -118,7 +118,11 @@ fun SandboxScreen(
             }
 
             if (selectedTabIndex == 0) {
-                PortfolioTab(model = model, onEvent = viewModel::onEvent)
+                PortfolioTab(
+                    model = model,
+                    onEvent = viewModel::onEvent,
+                    getName = viewModel::getInstrumentNameByFigi
+                )
             }
             if (selectedTabIndex == 1) {
                 InstrumentsTab(model = model, onEvent = viewModel::onEvent)

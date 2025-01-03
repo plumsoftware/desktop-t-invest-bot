@@ -48,7 +48,7 @@ class SandboxViewModel(
                             sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
                         sandboxRepository.saveSandboxAccountId(accountId = accountId)
                         val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
-                        val positions: MutableList<Position> = portfolio.positions
+                        val positions: MutableList<Position> = portfolio.positions.reversed().toMutableList()
 
                         model.update {
                             it.copy(
@@ -130,9 +130,19 @@ class SandboxViewModel(
                         sandboxApi = model.value.sandboxApi!!,
                         id = event.id
                     )
+                    val resultMutableList: MutableList<InstrumentShort> = mutableListOf()
+                    val sandboxApi = model.value.sandboxApi
+                    if (sandboxApi != null) {
+                        instrumentsBy.forEach {
+                            if (it.apiTradeAvailableFlag) {
+                                resultMutableList.add(it)
+                            }
+                        }
+                    }
+
                     withContext(Dispatchers.Main) {
                         model.update {
-                            it.copy(instrumentsBy = instrumentsBy)
+                            it.copy(instrumentsBy = resultMutableList.toList())
                         }
                     }
                 }
@@ -140,7 +150,20 @@ class SandboxViewModel(
 
             is Event.BuyLot -> {
 
+                val lots = event.lot.toIntOrNull()
+                val sandboxApi = model.value.sandboxApi
+
+                if (lots != null && sandboxApi != null)
+                    viewModelScope.launch {
+                        sandboxRepository.buyWithLots(
+                            sandboxApi = sandboxApi,
+                            lots = lots,
+                            accountId = model.value.accountId,
+                            figi = model.value.selectedFigi
+                        )
+                    }
             }
+
             is Event.BuyWithMoney -> {
                 viewModelScope.launch {
                     sandboxRepository.buyWithMoney(
@@ -151,9 +174,11 @@ class SandboxViewModel(
                     )
                 }
             }
+
             is Event.SellLot -> {
 
             }
+
             is Event.SellWithMoney -> {
 
             }
@@ -177,5 +202,12 @@ class SandboxViewModel(
                 )
             }
         }
+    }
+
+    fun getInstrumentNameByFigi(figi: String) : String {
+        val sandboxApi = model.value.sandboxApi
+        return if (sandboxApi != null) {
+            sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).name
+        } else "Неопределено"
     }
 }

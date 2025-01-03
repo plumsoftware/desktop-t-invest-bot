@@ -30,4 +30,7 @@ interface SandboxRepository {
 
     suspend fun buyWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
     suspend fun sellWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
+
+    suspend fun buyWithLots(sandboxApi: InvestApi, lots: Int, accountId: String, figi: String)
+    suspend fun sellWithLots(sandboxApi: InvestApi, lots: Int, accountId: String, figi: String)
 }

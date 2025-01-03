@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ru.plumsoftware.core.brokerage.mappers.fromInstrumentTypeStrToRuStr
 import ru.plumsoftware.ui.components.PrimaryTextButton
 import ru.plumsoftware.ui.components.TertiaryButton
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
@@ -38,7 +39,7 @@ import ru.plumsoftware.ui.theme.disabled
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PositionsList2(model: State<Model>, onEvent: (Event) -> Unit) {
+fun PositionsList2(model: State<Model>, onEvent: (Event) -> Unit, getName: (String) -> String) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(
             space = Space.medium,
@@ -62,14 +63,8 @@ fun PositionsList2(model: State<Model>, onEvent: (Event) -> Unit) {
                 ),
                 horizontalAlignment = Alignment.Start
             ) {
-                var countInPortfolio = 0
-                model.value.portfolio?.positions?.forEachIndexed { _, position ->
-                    if (position.figi == item.figi) {
-                        countInPortfolio = position.quantity.toInt()
-                    }
-                }
                 PrimaryTextButton(
-                    text = "${item.figi} | ${item.instrumentType}\nВ портфеле ${item.quantity}",
+                    text = "${getName(item.figi)} | ${fromInstrumentTypeStrToRuStr(item.instrumentType)}\nВ портфеле ${item.quantity}",
                     onClick = {
                         expanded = !expanded
                         onEvent(Event.SelectInstrument(figi = item.figi))

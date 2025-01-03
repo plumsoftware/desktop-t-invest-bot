@@ -21,7 +21,7 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.plumsoftware.ui.theme.Space
 
 @Composable
-fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit) {
+fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit, getName: (String) -> String) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -73,5 +73,5 @@ fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit) {
         )
     }
 
-    PositionsList2(model = model, onEvent = onEvent)
+    PositionsList2(model = model, onEvent = onEvent, getName = getName)
 }

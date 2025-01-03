@@ -117,38 +117,83 @@ class SandboxRepositoryImpl : SandboxRepository {
             ).getOrderId()
     }
 
-    override suspend fun getInstrumentsBy(sandboxApi: InvestApi, id: String): List<InstrumentShort> {
+    override suspend fun getInstrumentsBy(
+        sandboxApi: InvestApi,
+        id: String
+    ): List<InstrumentShort> {
         val instruments = sandboxApi.instrumentsService.findInstrumentSync(id)
         return instruments.toList()
     }
 
-    override suspend fun buyWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String) {
+    override suspend fun buyWithMoney(
+        sandboxApi: InvestApi,
+        money: String,
+        accountId: String,
+        figi: String
+    ) {
         val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
-        println("lastPrice: $lastPrice")
+
         val minPriceIncrement =
             sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
-        println("min price: $minPriceIncrement")
 
-        val price = Quantity.ofQuotation(lastPrice)
+        val price = Quantity
+            .ofQuotation(lastPrice)
             .subtract(
-                Quantity.ofQuotation(minPriceIncrement)
-                    .mapValue { minPriceBigDecimal: BigDecimal ->
-                        minPriceBigDecimal.multiply(
-                            BigDecimal.TEN.multiply(BigDecimal.TEN)
-                        )
+                Quantity
+                    .ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal ->
+                        minPriceBigDecimal.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN))
                     }
             )
             .toQuotation()
-        println("price: $price")
 
-//        var orderId = sandboxApi.ordersService
-//            .postOrderSync(figi, 1, price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
-//                UUID.randomUUID().toString()).getOrderId()
+        var orderId = sandboxApi.ordersService
+            .postOrderSync(figi, 1, price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()).getOrderId()
     }
 
-    override suspend fun sellWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String) {
-        TODO("Not yet implemented")
+    override suspend fun sellWithMoney(
+        sandboxApi: InvestApi,
+        money: String,
+        accountId: String,
+        figi: String
+    ) {}
+
+    override suspend fun buyWithLots(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String
+    ) {
+        val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
+
+        val minPriceIncrement =
+            sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
+
+        val price = Quantity
+            .ofQuotation(lastPrice)
+            .subtract(
+                Quantity
+                    .ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal ->
+                        minPriceBigDecimal.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN))
+                    }
+            )
+            .toQuotation()
+
+        val orderId = sandboxApi.ordersService
+            .postOrderSync(figi, lots.toLong(), price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()).getOrderId()
+
+        println(orderId)
     }
+
+    override suspend fun sellWithLots(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String
+    ) {}
 
     private fun encode(sandboxConfig: SandboxConfig): String {
         val stringBuffer = StringBuffer()
