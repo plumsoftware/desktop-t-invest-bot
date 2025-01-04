@@ -34,6 +34,7 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.theme.Space
 import ru.plumsoftware.ui.components.sandbox_tabs.PortfolioTab
 import ru.plumsoftware.ui.components.sandbox_tabs.InstrumentsTab
+import ru.plumsoftware.ui.components.sandbox_tabs.MarketTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,8 +54,11 @@ fun SandboxScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(key1 = selectedTabIndex) {
-        if (selectedTabIndex == 0)
+        if (selectedTabIndex == 0 || selectedTabIndex == 2) {
             viewModel.onEvent(Event.Init)
+            viewModel.getCurrentPrice(selectedTabIndex == 2)
+        }
+
     }
 
     LaunchedEffect(key1 = Unit) {
@@ -147,6 +151,13 @@ fun SandboxScreen(
             }
             if (selectedTabIndex == 1) {
                 InstrumentsTab(model = model, onEvent = viewModel::onEvent)
+            }
+            if (selectedTabIndex == 2) {
+                MarketTab(
+                    model = model,
+                    onEvent = viewModel::onEvent,
+                    getInstrument = viewModel::getInstrument,
+                )
             }
         }
     }

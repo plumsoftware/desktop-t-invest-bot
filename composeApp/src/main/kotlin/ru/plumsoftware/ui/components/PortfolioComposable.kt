@@ -59,7 +59,7 @@ fun PortfolioComposable(model: State<Model>, onEvent: (Event) -> Unit) {
                     val percent = if (total != 0L) value.toLong() / total * 100 else 0
                     Text(
                         text = "Общая сумма портфеля ${value.toLong()} $currency ($percent%)",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
 

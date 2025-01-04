@@ -14,8 +14,10 @@ import ru.plumsoftware.core.settings.repository.SettingsRepository
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
+import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Position
 import kotlin.time.Duration.Companion.seconds
 
@@ -233,6 +235,38 @@ class SandboxViewModel(
                     portfolio = portfolio,
                     positions = positions
                 )
+            }
+        }
+    }
+
+    fun getInstrument(figi: String): Instrument? {
+        val sandboxApi = model.value.sandboxApi
+        return sandboxApi?.instrumentsService?.getInstrumentByFigiSync(figi)
+    }
+
+    fun getCurrentPrice(runPriceStream: Boolean) {
+        if (runPriceStream) {
+            val sandboxApi = model.value.sandboxApi
+
+            viewModelScope.launch(Dispatchers.IO) {
+                while (true) {
+                    delay(1.seconds)
+                    if (sandboxApi != null) {
+                        val portfolio: Portfolio = sandboxRepository.getPortfolio(
+                            sandboxApi = sandboxApi,
+                            accountId = model.value.accountId
+                        )
+
+                        val positions = portfolio.positions
+                        withContext(Dispatchers.Main) {
+                            model.update {
+                                it.copy(
+                                    positions = positions
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
