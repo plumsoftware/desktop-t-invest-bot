@@ -17,4 +17,14 @@ sealed class Event {
 
     data class BuyLot(val lot: String) : Event()
     data class SellLot(val lot: String) : Event()
+
+    data class AddToTrading(
+        val figi: String,
+        val countLots: Int,
+        val increase: String,
+        val decrease: String,
+        val isTrading: Boolean
+    ) : Event()
+
+    data class StartTrading(val isStartTrading: Boolean) : Event()
 }

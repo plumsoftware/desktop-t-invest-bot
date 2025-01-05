@@ -16,7 +16,12 @@ import androidx.compose.ui.text.style.TextAlign
 import ru.plumsoftware.ui.theme.Space
 
 @Composable
-fun CounterButton(value: String, onIncrease: () -> Unit, onDecrease: () -> Unit) {
+fun CounterButton(
+    value: String,
+    enabled: Boolean = true,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(
             space = Space.small,
@@ -25,6 +30,7 @@ fun CounterButton(value: String, onIncrease: () -> Unit, onDecrease: () -> Unit)
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(
+            enabled = enabled,
             onClick = onIncrease
         ) {
             Icon(
@@ -41,6 +47,7 @@ fun CounterButton(value: String, onIncrease: () -> Unit, onDecrease: () -> Unit)
         )
 
         IconButton(
+            enabled = enabled,
             onClick = onDecrease
         ) {
             Icon(

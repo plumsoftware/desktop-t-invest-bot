@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import ru.plumsoftware.core.brokerage.model.TradingModel
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
@@ -199,6 +200,35 @@ class SandboxViewModel(
             is Event.SelectInstrument -> {
                 model.update {
                     it.copy(selectedFigi = event.figi)
+                }
+            }
+
+            is Event.AddToTrading -> {
+                val isTrading = event.isTrading
+
+                if (isTrading) {
+                    val increase = event.increase.toFloatOrNull()
+                    val decrease = event.decrease.toFloatOrNull()
+                    if (increase != null && decrease != null) {
+                        model.value.tradingModels.add(
+                            TradingModel(
+                                figi = event.figi,
+                                countLots = event.countLots,
+                                increase = increase,
+                                decrease = decrease
+                            )
+                        )
+                    }
+                } else {
+                    model.value.tradingModels.removeIf { it.figi == event.figi }
+                }
+            }
+
+            is Event.StartTrading -> {
+                model.update {
+                    it.copy(
+                        isStartTrading = event.isStartTrading
+                    )
                 }
             }
         }
