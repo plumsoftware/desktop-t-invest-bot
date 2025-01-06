@@ -1,6 +1,7 @@
 package ru.plumsoftware.ui.presentation.screens.sandbox
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import ru.plumsoftware.core.brokerage.model.Trading
 import ru.plumsoftware.core.brokerage.model.TradingModel
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
@@ -17,9 +19,12 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.contract.v1.InstrumentShort
+import ru.tinkoff.piapi.contract.v1.MoneyValue
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Position
+import java.math.BigDecimal
 import kotlin.time.Duration.Companion.seconds
 
 class SandboxViewModel(
@@ -29,6 +34,10 @@ class SandboxViewModel(
 
     val effect = MutableSharedFlow<Effect>()
     val model = MutableStateFlow(Model())
+
+    private val supervisorTradingContext =
+        Dispatchers.IO + SupervisorJob() //Получение цены/покупка/продажа
+
 
     fun onEvent(event: Event) {
         when (event) {
@@ -230,6 +239,8 @@ class SandboxViewModel(
                         isStartTrading = event.isStartTrading
                     )
                 }
+
+                runTrading(isTradingStart = model.value.isStartTrading)
             }
         }
     }
@@ -293,6 +304,117 @@ class SandboxViewModel(
                                 it.copy(
                                     positions = positions
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Synchronized
+    fun runTrading(isTradingStart: Boolean) {
+
+        val tradingModels = model.value.tradingModels.toList()
+        val size = model.value.tradingModels.size
+        val figis = tradingModels.map { it.figi }
+
+        val sandboxApi = model.value.sandboxApi
+
+        if (sandboxApi != null) {
+            val startPricesMap = mutableMapOf<TradingModel, Money>()
+
+            var portfolio: Portfolio = sandboxRepository.getPortfolio(
+                sandboxApi = sandboxApi,
+                accountId = model.value.accountId
+            )
+            var positions = portfolio.positions
+
+            tradingModels.forEachIndexed { _, tradingModel ->
+                positions.forEachIndexed { _, position ->
+                    if (tradingModel.figi == position.figi)
+                        startPricesMap[tradingModel] = position.currentPrice
+                }
+            }
+
+            viewModelScope.launch(supervisorTradingContext) {
+                while (isTradingStart) {
+                    delay(Trading.DEFAULT_TRADING_TICK_MS)
+                    portfolio = sandboxRepository.getPortfolio(
+                        sandboxApi = sandboxApi,
+                        accountId = model.value.accountId
+                    )
+                    positions = portfolio.positions
+
+                    tradingModels.forEachIndexed { _, tradingModel ->
+                        positions.forEachIndexed { _, position ->
+                            if (tradingModel.figi == position.figi) {
+
+                                val increasePercent = tradingModel.increase
+                                val decreasePercent = tradingModel.decrease
+
+                                val currentPrice = position.currentPrice
+                                val oldPrice = startPricesMap[tradingModel]?.value?.toDouble()
+
+                                var haveWePaper = true
+
+                                var percentChange =
+                                    ((oldPrice?.minus(currentPrice.value.toDouble()))?.div(
+                                        oldPrice
+                                    ))?.times(100)
+
+                                println("figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: ${currentPrice.value}" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
+
+                                if (percentChange != null) {
+
+                                    val bidDecimal = currentPrice.value
+                                    val moneyValue = MoneyValue.newBuilder()
+                                        .setCurrency("RUB")
+                                        .setUnits(bidDecimal.toLong())
+                                        .setNano(
+                                            bidDecimal.remainder(BigDecimal.ONE)
+                                                .multiply(BigDecimal.valueOf(1_000_000_000))
+                                                .toInt()
+                                        )
+                                        .build()
+
+                                    if (percentChange < 0) {
+                                        percentChange *= -1
+
+                                        if (percentChange >= decreasePercent) {
+                                            //SELL
+                                            if (haveWePaper)
+                                                println("-->SELL<--" + "\n=====================================")
+
+                                            haveWePaper = false
+
+                                            //Change old price
+                                            startPricesMap[tradingModel] =
+                                                Money.fromResponse(moneyValue)
+                                        } else {
+                                            //HOLD
+                                            println("-->HOLD<--" + "\n=====================================")
+                                        }
+                                    } else if (percentChange > 0) {
+                                        if (percentChange >= increasePercent) {
+                                            //BUY
+                                            if (haveWePaper)
+                                                println("-->BUY<--" + "\n=====================================")
+
+                                            haveWePaper = true
+
+                                            //Change old price
+                                            startPricesMap[tradingModel] =
+                                                Money.fromResponse(moneyValue)
+                                        } else {
+                                            //HOLD
+                                            println("-->HOLD<--" + "\n=====================================")
+                                        }
+                                    } else {
+                                        //HOLD
+                                        println("-->HOLD<--" + "\n=====================================")
+                                    }
+                                }
                             }
                         }
                     }
