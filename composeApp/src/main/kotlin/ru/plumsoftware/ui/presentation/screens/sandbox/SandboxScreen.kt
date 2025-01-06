@@ -28,6 +28,7 @@ import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.viewmodel.viewModel
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
+import ru.plumsoftware.log.repository.LogRepository
 import ru.plumsoftware.ui.components.TopBar
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
@@ -41,13 +42,15 @@ import ru.plumsoftware.ui.components.sandbox_tabs.MarketTab
 fun SandboxScreen(
     navigator: Navigator,
     settingsRepository: SettingsRepository,
-    sandboxRepository: SandboxRepository
+    sandboxRepository: SandboxRepository,
+    logRepository: LogRepository
 ) {
 
     val viewModel = viewModel(modelClass = SandboxViewModel::class) {
         SandboxViewModel(
             settingsRepository = settingsRepository,
-            sandboxRepository = sandboxRepository
+            sandboxRepository = sandboxRepository,
+            logRepository = logRepository
         )
     }
     val model = viewModel.model.collectAsState()
