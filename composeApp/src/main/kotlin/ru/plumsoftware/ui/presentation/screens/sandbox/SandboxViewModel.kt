@@ -1,7 +1,10 @@
 package ru.plumsoftware.ui.presentation.screens.sandbox
 
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,10 +41,7 @@ class SandboxViewModel(
     val effect = MutableSharedFlow<Effect>()
     val model = MutableStateFlow(Model())
 
-    private val supervisorIOTradingContext =
-        Dispatchers.IO + SupervisorJob() //Получение цены/покупка/продажа
-    private val supervisorDefaultTradingContext =
-        Dispatchers.Default + SupervisorJob() //Получение цены/покупка/продажа
+    private val supervisorIOTradingContext = Dispatchers.IO + SupervisorJob() + CoroutineName("trading coroutine") //Получение цены/покупка/продажа
 
 
     fun onEvent(event: Event) {
@@ -341,6 +341,8 @@ class SandboxViewModel(
 
             val job = viewModelScope.launch(supervisorIOTradingContext) {
                 while (isTradingStart) {
+                    val coroutineName = coroutineContext[CoroutineName.Key]?.name ?: "Unknown"
+                    println("Coroutine with name: $coroutineName")
                     delay(Trading.DEFAULT_TRADING_TICK_MS)
                     portfolio = sandboxRepository.getPortfolio(
                         sandboxApi = sandboxApi,
@@ -448,8 +450,12 @@ class SandboxViewModel(
                     }
                 }
             }
-            if (!isTradingStart)
+            if (!isTradingStart) {
+                println(isTradingStart)
+                viewModelScope.cancel()
+                job.cancelChildren()
                 job.cancel()
+            }
         }
     }
 }
