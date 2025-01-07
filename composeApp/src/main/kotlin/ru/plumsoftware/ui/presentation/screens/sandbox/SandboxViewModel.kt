@@ -246,6 +246,15 @@ class SandboxViewModel(
                     )
                 }
 
+                var msg = ""
+                if (model.value.isStartTrading)
+                    msg += "Торги начаты."
+                else
+                    msg += "Торги остановлены."
+                viewModelScope.launch {
+                    effect.emit(Effect.ShowSnackbar(msg))
+                }
+
                 runTrading()
             }
         }
@@ -354,6 +363,7 @@ class SandboxViewModel(
                     tradingModels.forEachIndexed { _, tradingModel ->
                         positions.forEachIndexed { _, position ->
                             if (tradingModel.figi == position.figi) {
+                                val instrument = getInstrument(figi = tradingModel.figi)
                                 val isSold = isSoldMap.getOrDefault(tradingModel, false)
                                 withContext(supervisorDefaultTradingContext) {
                                     val increasePercent = tradingModel.increase
@@ -365,7 +375,7 @@ class SandboxViewModel(
 
                                     val percentChange = ((currentPrice - oldPrice) / oldPrice) * 100
 
-                                    println("figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
+                                    println("name: ${instrument?.name}" + "\n" + "figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
 
                                     var operation = ""
 
@@ -429,7 +439,7 @@ class SandboxViewModel(
                                             println("-->$operation<--\n=====================================")
                                         }
                                     }
-                                    if (percentChange == 0.0){
+                                    if (percentChange == 0.0) {
                                         //HOLD
                                         operation = "HOLD"
                                         println("-->$operation<--\n=====================================")
@@ -438,6 +448,9 @@ class SandboxViewModel(
                                     withContext(supervisorIOTradingContext) {
                                         logRepository.write(
                                             LogSandbox(
+                                                accountId = model.value.accountId,
+                                                name = instrument?.name
+                                                    ?: "${tradingModel.figi}_name_unspecified",
                                                 figi = tradingModel.figi,
                                                 countLots = tradingModel.countLots.toString(),
                                                 currentPrice = currentPrice.toString(),

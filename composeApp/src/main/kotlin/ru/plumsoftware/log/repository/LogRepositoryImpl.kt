@@ -17,14 +17,14 @@ class LogRepositoryImpl : LogRepository {
     }
 
     override suspend fun write(logSandbox: LogSandbox) {
-        val path = Log.Path.Sandbox.mainPathToSandboxLogFolder + "\\${logSandbox.figi}"
+        val path = Log.Path.Sandbox.mainPathToSandboxLogFolder + "\\${logSandbox.name}-log\\${logSandbox.accountId}-log"
         val folder = File(path)
 
         if (!folder.exists())
-            folder.mkdir()
+            folder.mkdirs()
 
         val pathToFile =
-            Log.Path.Sandbox.mainPathToSandboxLogFolder + "\\${logSandbox.figi}\\${logSandbox.figi}.txt"
+            Log.Path.Sandbox.mainPathToSandboxLogFolder + "\\${logSandbox.name}-log\\${logSandbox.accountId}-log\\${logSandbox.name}-${logSandbox.figi}-log.txt"
         val file = File(pathToFile)
         if (!file.exists())
             withContext(Dispatchers.IO) {

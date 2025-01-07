@@ -55,7 +55,7 @@ fun MarketCard(
     val instrument = getInstrument(position.figi)
 
     if (instrument != null) {
-        val lot = position.quantity.toInt() / instrument.lot
+        val lot = position.quantity.toInt() / instrument.lot - 1
         var value by remember { mutableIntStateOf(1) }
         var checked by remember { mutableStateOf(false) }
 
