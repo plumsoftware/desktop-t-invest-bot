@@ -2,6 +2,7 @@ package ru.plumsoftware.ui.presentation.screens.sandbox
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -359,113 +360,119 @@ class SandboxViewModel(
                         accountId = model.value.accountId
                     )
                     positions = portfolio.positions
+                    val jobs = mutableListOf<Job>()
 
                     tradingModels.forEachIndexed { _, tradingModel ->
                         positions.forEachIndexed { _, position ->
                             if (tradingModel.figi == position.figi) {
-                                val instrument = getInstrument(figi = tradingModel.figi)
-                                val isSold = isSoldMap.getOrDefault(tradingModel, false)
-                                withContext(supervisorDefaultTradingContext) {
-                                    val increasePercent = tradingModel.increase
-                                    val decreasePercent = tradingModel.decrease
+                                val job = viewModelScope.launch(supervisorDefaultTradingContext) {
+                                    val instrument = getInstrument(figi = tradingModel.figi)
+                                    val isSold = isSoldMap.getOrDefault(tradingModel, false)
+                                    withContext(supervisorDefaultTradingContext) {
+                                        val increasePercent = tradingModel.increase
+                                        val decreasePercent = tradingModel.decrease
 
-                                    val currentPrice = position.currentPrice.value.toDouble()
-                                    val oldPrice =
-                                        startPricesMap[tradingModel]?.value?.toDouble() ?: 0.0
+                                        val currentPrice = position.currentPrice.value.toDouble()
+                                        val oldPrice =
+                                            startPricesMap[tradingModel]?.value?.toDouble() ?: 0.0
 
-                                    val percentChange = ((currentPrice - oldPrice) / oldPrice) * 100
+                                        val percentChange =
+                                            ((currentPrice - oldPrice) / oldPrice) * 100
 
-                                    println("name: ${instrument?.name}" + "\n" + "figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
+                                        println("name: ${instrument?.name}" + "\n" + "figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
 
-                                    var operation = ""
+                                        var operation = ""
 
-                                    val bidDecimal = BigDecimal.valueOf(currentPrice)
-                                    val moneyValue = MoneyValue.newBuilder()
-                                        .setCurrency("RUB")
-                                        .setUnits(bidDecimal.toLong())
-                                        .setNano(
-                                            bidDecimal.remainder(BigDecimal.ONE)
-                                                .multiply(BigDecimal.valueOf(1_000_000_000))
-                                                .toInt()
-                                        )
-                                        .build()
-
-                                    if (percentChange < 0) {
-                                        if ((percentChange * -1) >= decreasePercent) {
-                                            //BUY
-                                            if (isSold) {
-                                                withContext(supervisorIOTradingContext) {
-
-                                                }
-
-                                                operation = "BUY"
-                                                println("-->$operation<--\n=====================================")
-
-                                                isSoldMap[tradingModel] = false
-
-                                                //Change old price
-                                                startPricesMap[tradingModel] =
-                                                    Money.fromResponse(moneyValue)
-                                            }
-                                        } else {
-                                            //HOLD
-                                            operation = "HOLD"
-                                            println("-->$operation<--\n=====================================")
-                                        }
-                                    }
-                                    if (percentChange > 0) {
-                                        if (percentChange >= increasePercent) {
-                                            //SELL
-                                            if (!isSold) {
-                                                withContext(supervisorIOTradingContext) {
-                                                    sandboxRepository.sellWithLots(
-                                                        sandboxApi = sandboxApi,
-                                                        lots = tradingModel.countLots,
-                                                        accountId = model.value.accountId,
-                                                        figi = tradingModel.figi
-                                                    )
-                                                }
-                                                operation = "SELL"
-                                                isSoldMap[tradingModel] = true
-                                                println("-->$operation<--\n=====================================")
-
-                                                //Change old price
-                                                startPricesMap[tradingModel] =
-                                                    Money.fromResponse(moneyValue)
-                                            }
-                                        } else {
-                                            //HOLD
-                                            operation = "HOLD"
-                                            println("-->$operation<--\n=====================================")
-                                        }
-                                    }
-                                    if (percentChange == 0.0) {
-                                        //HOLD
-                                        operation = "HOLD"
-                                        println("-->$operation<--\n=====================================")
-                                    }
-
-                                    withContext(supervisorIOTradingContext) {
-                                        logRepository.write(
-                                            LogSandbox(
-                                                accountId = model.value.accountId,
-                                                name = instrument?.name
-                                                    ?: "${tradingModel.figi}_name_unspecified",
-                                                figi = tradingModel.figi,
-                                                countLots = tradingModel.countLots.toString(),
-                                                currentPrice = currentPrice.toString(),
-                                                lastPrice = startPricesMap[tradingModel]?.value.toString() + " " + startPricesMap[tradingModel]?.currency,
-                                                percentIncrease = tradingModel.increase.toString(),
-                                                percentDecrease = tradingModel.decrease.toString(),
-                                                currentPercentChange = percentChange.toString(),
-                                                operation = operation
+                                        val bidDecimal = BigDecimal.valueOf(currentPrice)
+                                        val moneyValue = MoneyValue.newBuilder()
+                                            .setCurrency("RUB")
+                                            .setUnits(bidDecimal.toLong())
+                                            .setNano(
+                                                bidDecimal.remainder(BigDecimal.ONE)
+                                                    .multiply(BigDecimal.valueOf(1_000_000_000))
+                                                    .toInt()
                                             )
-                                        )
+                                            .build()
+
+                                        if (percentChange < 0) {
+                                            if ((percentChange * -1) >= decreasePercent) {
+                                                //BUY
+                                                if (isSold) {
+                                                    withContext(supervisorIOTradingContext) {
+
+                                                    }
+
+                                                    operation = "BUY"
+                                                    println("-->$operation<--\n=====================================")
+
+                                                    isSoldMap[tradingModel] = false
+
+                                                    //Change old price
+                                                    startPricesMap[tradingModel] =
+                                                        Money.fromResponse(moneyValue)
+                                                }
+                                            } else {
+                                                //HOLD
+                                                operation = "HOLD"
+                                                println("-->$operation<--\n=====================================")
+                                            }
+                                        }
+                                        if (percentChange > 0) {
+                                            if (percentChange >= increasePercent) {
+                                                //SELL
+                                                if (!isSold) {
+                                                    withContext(supervisorIOTradingContext) {
+                                                        sandboxRepository.sellWithLots(
+                                                            sandboxApi = sandboxApi,
+                                                            lots = tradingModel.countLots,
+                                                            accountId = model.value.accountId,
+                                                            figi = tradingModel.figi
+                                                        )
+                                                    }
+                                                    operation = "SELL"
+                                                    isSoldMap[tradingModel] = true
+                                                    println("-->$operation<--\n=====================================")
+
+                                                    //Change old price
+                                                    startPricesMap[tradingModel] =
+                                                        Money.fromResponse(moneyValue)
+                                                }
+                                            } else {
+                                                //HOLD
+                                                operation = "HOLD"
+                                                println("-->$operation<--\n=====================================")
+                                            }
+                                        }
+                                        if (percentChange == 0.0) {
+                                            //HOLD
+                                            operation = "HOLD"
+                                            println("-->$operation<--\n=====================================")
+                                        }
+
+                                        withContext(supervisorIOTradingContext) {
+                                            logRepository.write(
+                                                LogSandbox(
+                                                    accountId = model.value.accountId,
+                                                    name = instrument?.name
+                                                        ?: "${tradingModel.figi}_name_unspecified",
+                                                    figi = tradingModel.figi,
+                                                    countLots = tradingModel.countLots.toString(),
+                                                    currentPrice = currentPrice.toString(),
+                                                    lastPrice = startPricesMap[tradingModel]?.value.toString() + " " + startPricesMap[tradingModel]?.currency,
+                                                    percentIncrease = tradingModel.increase.toString(),
+                                                    percentDecrease = tradingModel.decrease.toString(),
+                                                    currentPercentChange = percentChange.toString(),
+                                                    operation = operation
+                                                )
+                                            )
+                                        }
                                     }
                                 }
+                                jobs.add(job)
                             }
                         }
                     }
+                    jobs.forEach { it.join() }
                 }
             }
 
