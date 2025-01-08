@@ -4,16 +4,15 @@ import kotlinx.serialization.json.Json
 import ru.plumsoftware.core.brokerage.sandbox.model.Acc
 import ru.plumsoftware.core.brokerage.sandbox.model.Path
 import ru.plumsoftware.core.brokerage.sandbox.model.SandboxConfig
-import ru.tinkoff.piapi.contract.v1.Account
-import ru.tinkoff.piapi.contract.v1.MoneyValue
+import ru.tinkoff.piapi.contract.v1.*
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Positions
 import ru.tinkoff.piapi.core.models.Quantity
 import java.io.File
 import java.math.BigDecimal
 import java.util.UUID
-import ru.tinkoff.piapi.contract.v1.*
 
 
 class SandboxRepositoryImpl : SandboxRepository {
@@ -148,8 +147,15 @@ class SandboxRepositoryImpl : SandboxRepository {
             .toQuotation()
 
         var orderId = sandboxApi.ordersService
-            .postOrderSync(figi, 1, price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
-                UUID.randomUUID().toString()).getOrderId()
+            .postOrderSync(
+                figi,
+                1,
+                price,
+                OrderDirection.ORDER_DIRECTION_BUY,
+                accountId,
+                OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()
+            ).getOrderId()
     }
 
     override suspend fun sellWithMoney(
@@ -157,18 +163,87 @@ class SandboxRepositoryImpl : SandboxRepository {
         money: String,
         accountId: String,
         figi: String
-    ) {}
+    ) {
+    }
 
     override suspend fun buyWithLots(
         sandboxApi: InvestApi,
         lots: Int,
         accountId: String,
-        figi: String
+
+        figi: String,
+        price: Money
     ) {
         val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
-
+        val instrument = sandboxApi.instrumentsService.getInstrumentByFigiSync(figi)
         val minPriceIncrement =
-            sandboxApi.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
+            instrument.minPriceIncrement
+
+        val bigDecimal = price.value
+        val quotation = Quotation.newBuilder()
+            .setUnits(bigDecimal.toLong())
+            .setNano(
+                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
+                    .toInt()
+            )
+            .build()
+
+        println("+++++++++++++++++++++++>Buy ${instrument.name} with price ${quotation}<+++++++++++++++++++++++")
+
+        val orderId = sandboxApi.ordersService
+            .postOrderSync(
+                figi,
+                lots.toLong(),
+                quotation,
+                OrderDirection.ORDER_DIRECTION_BUY,
+                accountId,
+                OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()
+            ).getOrderId()
+        println(orderId)
+    }
+
+    override suspend fun sellWithLots(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String,
+        price: Money
+    ) {
+        val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
+        val instrument = sandboxApi.instrumentsService.getInstrumentByFigiSync(figi)
+        val minPriceIncrement =
+            instrument.minPriceIncrement
+
+        val bigDecimal = price.value
+        val quotation = Quotation.newBuilder()
+            .setUnits(bigDecimal.toLong())
+            .setNano(
+                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
+                    .toInt()
+            )
+            .build()
+
+        println("+++++++++++++++++++++++>Sell ${instrument.name} with price ${quotation}<+++++++++++++++++++++++")
+
+        val orderId = sandboxApi.ordersService
+            .postOrderSync(
+                figi,
+                lots.toLong(),
+                quotation,
+                OrderDirection.ORDER_DIRECTION_SELL,
+                accountId,
+                OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()
+            ).getOrderId()
+        println(orderId)
+    }
+
+    override suspend fun buy(sandboxApi: InvestApi, lots: Int, accountId: String, figi: String) {
+        val lastPrice = sandboxApi.marketDataService.getLastPricesSync(listOf(figi))[0].price
+        val instrument = sandboxApi.instrumentsService.getInstrumentByFigiSync(figi)
+        val minPriceIncrement =
+            instrument.minPriceIncrement
 
         val price = Quantity
             .ofQuotation(lastPrice)
@@ -182,18 +257,17 @@ class SandboxRepositoryImpl : SandboxRepository {
             .toQuotation()
 
         val orderId = sandboxApi.ordersService
-            .postOrderSync(figi, lots.toLong(), price, OrderDirection.ORDER_DIRECTION_BUY, accountId, OrderType.ORDER_TYPE_MARKET,
-                UUID.randomUUID().toString()).getOrderId()
-
-        println(orderId)
+            .postOrderSync(
+                figi,
+                lots.toLong(),
+                price,
+                OrderDirection.ORDER_DIRECTION_BUY,
+                accountId,
+                OrderType.ORDER_TYPE_MARKET,
+                UUID.randomUUID().toString()
+            ).getOrderId()
+        println("Order id: $orderId")
     }
-
-    override suspend fun sellWithLots(
-        sandboxApi: InvestApi,
-        lots: Int,
-        accountId: String,
-        figi: String
-    ) {}
 
     private fun encode(sandboxConfig: SandboxConfig): String {
         val stringBuffer = StringBuffer()

@@ -1,9 +1,10 @@
 package ru.plumsoftware.ui.components.sandbox_tabs
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -28,13 +29,14 @@ fun MarketTab(
 
     var isStartTrading by remember { mutableStateOf(false) }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
-            .padding(horizontal = Space.medium, vertical = Space.small),
+            .padding(horizontal = Space.medium, vertical = Space.small)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(space = Space.medium, alignment = Alignment.Top),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        itemsIndexed(model.value.positions) { _, item ->
+        model.value.positions.forEach { item ->
             MarketCard(
                 position = item,
                 isStartTrading = isStartTrading,
@@ -42,14 +44,12 @@ fun MarketTab(
                 onEvent = onEvent
             )
         }
-        item {
-            PrimaryButton(
-                text = if (isStartTrading) "Закончить торги" else "Начать торги",
-                onClick = {
-                    isStartTrading = !isStartTrading
-                    onEvent(Event.StartTrading(isStartTrading = isStartTrading))
-                }
-            )
-        }
+        PrimaryButton(
+            text = if (isStartTrading) "Закончить торги" else "Начать торги",
+            onClick = {
+                isStartTrading = !isStartTrading
+                onEvent(Event.StartTrading(isStartTrading = isStartTrading))
+            }
+        )
     }
 }

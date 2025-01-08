@@ -3,6 +3,7 @@ package ru.plumsoftware.core.brokerage.sandbox.repository
 import ru.tinkoff.piapi.contract.v1.Account
 import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Positions
 
@@ -31,6 +32,25 @@ interface SandboxRepository {
     suspend fun buyWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
     suspend fun sellWithMoney(sandboxApi: InvestApi, money: String, accountId: String, figi: String)
 
-    suspend fun buyWithLots(sandboxApi: InvestApi, lots: Int, accountId: String, figi: String)
-    suspend fun sellWithLots(sandboxApi: InvestApi, lots: Int, accountId: String, figi: String)
+    suspend fun buyWithLots(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String,
+        price: Money
+    )
+    suspend fun sellWithLots(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String,
+        price: Money
+    )
+
+    suspend fun buy(
+        sandboxApi: InvestApi,
+        lots: Int,
+        accountId: String,
+        figi: String,
+    )
 }
