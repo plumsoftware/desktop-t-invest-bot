@@ -146,6 +146,7 @@ class MarketViewModel(
         if (api != null) {
             val startPricesMap = mutableMapOf<TradingModel, Money>()
             val isSoldMap = mutableMapOf<TradingModel, Boolean>()
+            val orderMap = mutableMapOf<TradingModel, String>()
 
             var portfolio: Portfolio = marketRepository.getPortfolio(
                 api = api,
@@ -176,6 +177,7 @@ class MarketViewModel(
                             if (tradingModel.figi == position.figi) {
                                 val instrument = getInstrumentByFigi(figi = tradingModel.figi)
                                 val isSold = isSoldMap.getOrDefault(tradingModel, false)
+                                val lastOrder = orderMap.getOrDefault(tradingModel, "")
                                 val lots = tradingModel.countLots
                                 withContext(supervisorDefaultTradingContext) {
                                     val increasePercent = tradingModel.increase
@@ -206,25 +208,30 @@ class MarketViewModel(
                                     if (percentChange < 0) {
                                         if ((percentChange * -1) >= decreasePercent) {
                                             //BUY
+                                            val orders = api.ordersService.getOrdersSync(accountId)
+                                            orders.forEach {
+                                                if (it.orderId != lastOrder) {
+                                                    isSoldMap[tradingModel] = false
+                                                }
+                                            }
                                             if (isSold) {
                                                 val money = Money.fromResponse(moneyValue)
                                                 withContext(supervisorIOTradingContext) {
-                                                    marketRepository.buyWithLots(
+                                                    val orderId = marketRepository.buyWithLots(
                                                         api = api,
                                                         lots = lots,
                                                         accountId = model.value.accountId,
                                                         figi = tradingModel.figi,
                                                         price = money
                                                     )
+                                                    orderMap[tradingModel] = orderId
+
+                                                    //Change old price
+                                                    startPricesMap[tradingModel] = money
                                                 }
 
                                                 operation = "BUY"
                                                 println("-->$operation<--\n=====================================")
-
-                                                isSoldMap[tradingModel] = false
-
-                                                //Change old price
-                                                startPricesMap[tradingModel] = money
 
                                             }
                                         } else {
@@ -240,23 +247,29 @@ class MarketViewModel(
                                     if (percentChange > 0) {
                                         if (percentChange >= increasePercent) {
                                             //SELL
+                                            val orders = api.ordersService.getOrdersSync(accountId)
+                                            orders.forEach {
+                                                if (it.orderId != lastOrder) {
+                                                    isSoldMap[tradingModel] = true
+                                                }
+                                            }
                                             if (!isSold) {
                                                 val money = Money.fromResponse(moneyValue)
                                                 withContext(supervisorIOTradingContext) {
-                                                    marketRepository.sellWithLots(
+                                                    val orderId = marketRepository.sellWithLots(
                                                         api = api,
-                                                        lots = tradingModel.countLots,
+                                                        lots = lots,
                                                         accountId = model.value.accountId,
                                                         figi = tradingModel.figi,
                                                         price = money
                                                     )
+                                                    orderMap[tradingModel] = orderId
+                                                    //Change old price
+                                                    startPricesMap[tradingModel] = money
                                                 }
                                                 operation = "SELL"
-                                                isSoldMap[tradingModel] = true
-                                                println("-->$operation<--\n=====================================")
 
-                                                //Change old price
-                                                startPricesMap[tradingModel] = money
+                                                println("-->$operation<--\n=====================================")
                                             }
                                         } else {
                                             //HOLD

@@ -21,12 +21,12 @@ interface MarketRepository {
         accountId: String,
         figi: String,
         price: Money
-    )
+    ) : String
     suspend fun sellWithLots(
         api: InvestApi,
         lots: Int,
         accountId: String,
         figi: String,
         price: Money
-    )
+    ) : String
 }

@@ -1,20 +1,21 @@
 package ru.plumsoftware.core.brokerage.market
 
 import kotlinx.serialization.json.Json
-import ru.plumsoftware.core.brokerage.market.model.MarketConfig
 import ru.plumsoftware.core.brokerage.market.model.Acc
+import ru.plumsoftware.core.brokerage.market.model.MarketConfig
 import ru.plumsoftware.core.brokerage.market.model.Path
 import ru.tinkoff.piapi.contract.v1.Account
 import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.contract.v1.OrderDirection
 import ru.tinkoff.piapi.contract.v1.OrderType
-import ru.tinkoff.piapi.contract.v1.Quotation
 import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
+import ru.tinkoff.piapi.core.models.Quantity
 import java.io.File
 import java.math.BigDecimal
 import java.util.UUID
+
 
 class MarketRepositoryImpl : MarketRepository {
 
@@ -34,7 +35,7 @@ class MarketRepositoryImpl : MarketRepository {
         file.writeBytes(encode(get.copy(acc = Acc(accountId))).encodeToByteArray())
     }
 
-    override suspend fun getMarketAccounts(api: InvestApi) : List<Account> {
+    override suspend fun getMarketAccounts(api: InvestApi): List<Account> {
         return api.userService.accountsSync
     }
 
@@ -58,27 +59,55 @@ class MarketRepositoryImpl : MarketRepository {
         accountId: String,
         figi: String,
         price: Money
-    ) {
-        val bigDecimal = price.value
-        val quotation = Quotation.newBuilder()
-            .setUnits(bigDecimal.toLong())
-            .setNano(
-                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
-                    .toInt()
-            )
-            .build()
+    ): String {
+//        val bigDecimal = price.value
+//        val quotation = Quotation.newBuilder()
+//            .setUnits(bigDecimal.toLong())
+//            .setNano(
+//                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
+//                    .toInt()
+//            )
+//            .build()
+//
+//        val orderId = api.ordersService
+//            .postOrderSync(
+//                figi,
+//                lots.toLong(),
+//                quotation,
+//                OrderDirection.ORDER_DIRECTION_BUY,
+//                accountId,
+//                OrderType.ORDER_TYPE_LIMIT,
+//                UUID.randomUUID().toString()
+//            ).getOrderId()
 
-        val orderId = api.ordersService
-            .postOrderSync(
-                figi,
-                lots.toLong(),
-                quotation,
-                OrderDirection.ORDER_DIRECTION_BUY,
-                accountId,
-                OrderType.ORDER_TYPE_MARKET,
-                UUID.randomUUID().toString()
-            ).getOrderId()
-        println("Заявка на покупку $lots лотов инструмента с figi $figi номер: $orderId")
+        val lastPrice = api.marketDataService.getLastPricesSync(listOf(figi))[0].price
+        val minPriceIncrement =
+            api.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
+        val newPrice = Quantity.ofQuotation(lastPrice)
+            .subtract(
+                Quantity.ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal: BigDecimal ->
+                        minPriceBigDecimal.multiply(
+                            BigDecimal.TEN.multiply(
+                                BigDecimal.TEN
+                            )
+                        )
+                    }
+            )
+            .toQuotation()
+
+        val orderId = api.ordersService.postOrderSync(
+            figi,
+            lots.toLong(),
+            newPrice,
+            OrderDirection.ORDER_DIRECTION_BUY,
+            accountId,
+            OrderType.ORDER_TYPE_LIMIT,
+            UUID.randomUUID().toString()
+        ).getOrderId()
+
+        println("Заявка на покупку $lots лотов инструмента с figi $figi номер: $orderId. Цена ${price.value}")
+        return orderId
     }
 
     override suspend fun sellWithLots(
@@ -87,28 +116,55 @@ class MarketRepositoryImpl : MarketRepository {
         accountId: String,
         figi: String,
         price: Money
-    ) {
-        val bigDecimal = price.value
-        val quotation = Quotation.newBuilder()
-            .setUnits(bigDecimal.toLong())
-            .setNano(
-                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
-                    .toInt()
+    ): String {
+//        val bigDecimal = price.value
+//        val quotation = Quotation.newBuilder()
+//            .setUnits(bigDecimal.toLong())
+//            .setNano(
+//                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
+//                    .toInt()
+//            )
+//            .build()
+//
+//        val orderId = api.ordersService
+//            .postOrderSync(
+//                figi,
+//                lots.toLong(),
+//                quotation,
+//                OrderDirection.ORDER_DIRECTION_SELL,
+//                accountId,
+//                OrderType.ORDER_TYPE_LIMIT,
+//                UUID.randomUUID().toString()
+//            ).getOrderId()
+
+        val lastPrice = api.marketDataService.getLastPricesSync(listOf(figi))[0].price
+        val minPriceIncrement =
+            api.instrumentsService.getInstrumentByFigiSync(figi).minPriceIncrement
+        val newPrice = Quantity.ofQuotation(lastPrice)
+            .subtract(
+                Quantity.ofQuotation(minPriceIncrement)
+                    .mapValue { minPriceBigDecimal: BigDecimal ->
+                        minPriceBigDecimal.multiply(
+                            BigDecimal.TEN.multiply(
+                                BigDecimal.TEN
+                            )
+                        )
+                    }
             )
-            .build()
+            .toQuotation()
 
-        val orderId = api.ordersService
-            .postOrderSync(
-                figi,
-                lots.toLong(),
-                quotation,
-                OrderDirection.ORDER_DIRECTION_SELL,
-                accountId,
-                OrderType.ORDER_TYPE_MARKET,
-                UUID.randomUUID().toString()
-            ).getOrderId()
+        val orderId = api.ordersService.postOrderSync(
+            figi,
+            lots.toLong(),
+            newPrice,
+            OrderDirection.ORDER_DIRECTION_SELL,
+            accountId,
+            OrderType.ORDER_TYPE_LIMIT,
+            UUID.randomUUID().toString()
+        ).getOrderId();
 
-        println("Заявка на продажу $lots лотов инструмента с figi $figi номер: $orderId")
+        println("Заявка на продажу $lots лотов инструмента с figi $figi номер: $orderId. Цена ${price.value}")
+        return orderId
     }
 
     private fun encode(marketConfig: MarketConfig): String {
