@@ -13,9 +13,10 @@ import ru.plumsoftware.core.brokerage.mappers.fromInstrumentTypeStrToRuStr
 import ru.plumsoftware.ui.components.PrimaryTextButton
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.plumsoftware.ui.theme.Space
+import ru.tinkoff.piapi.contract.v1.Instrument
 
 @Composable
-fun PositionsList2(model: State<Model>, getName: (String) -> String) {
+fun PositionsList2(model: State<Model>, getInstrument: (String) -> Instrument?) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(
             space = Space.medium,
@@ -34,7 +35,7 @@ fun PositionsList2(model: State<Model>, getName: (String) -> String) {
                 horizontalAlignment = Alignment.Start
             ) {
                 PrimaryTextButton(
-                    text = "${getName(item.figi)} | ${fromInstrumentTypeStrToRuStr(item.instrumentType)}\nВ портфеле ${item.quantity}",
+                    text = "${getInstrument(item.figi)?.name} | ${fromInstrumentTypeStrToRuStr(item.instrumentType)}\nВ портфеле ${item.quantity}",
                     onClick = {}
                 )
             }

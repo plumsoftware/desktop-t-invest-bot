@@ -1,4 +1,4 @@
-package ru.plumsoftware.ui.components.sandbox_tabs
+package ru.plumsoftware.ui.components.tabs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

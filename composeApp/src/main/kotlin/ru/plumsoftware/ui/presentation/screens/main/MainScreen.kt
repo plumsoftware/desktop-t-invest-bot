@@ -30,7 +30,7 @@ fun MainScreen(navigator: Navigator) {
         mainViewModel.effect.collect { effect ->
             when (effect) {
                 Effect.OpenBidding -> {
-                    navigator.navigate(route = DesktopRouting.bidding)
+                    navigator.navigate(route = DesktopRouting.selectMarketAccountId)
                 }
 
                 Effect.OpenSandbox -> {

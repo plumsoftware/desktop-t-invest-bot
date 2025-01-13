@@ -1,4 +1,4 @@
-package ru.plumsoftware.ui.presentation.screens.sandbox
+package ru.plumsoftware.ui.presentation.screens.market
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
@@ -11,213 +11,39 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
+import ru.plumsoftware.core.brokerage.market.MarketRepository
 import ru.plumsoftware.core.brokerage.model.Trading
 import ru.plumsoftware.core.brokerage.model.TradingModel
-import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
+import ru.plumsoftware.log.model.LogMode
 import ru.plumsoftware.log.model.LogTradingOperation
 import ru.plumsoftware.log.repository.LogRepository
-import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
-import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
-import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
+import ru.plumsoftware.ui.presentation.screens.market.model.Effect
+import ru.plumsoftware.ui.presentation.screens.market.model.Event
+import ru.plumsoftware.ui.presentation.screens.market.model.Model
 import ru.tinkoff.piapi.contract.v1.Instrument
-import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.contract.v1.MoneyValue
 import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
-import ru.tinkoff.piapi.core.models.Position
 import java.math.BigDecimal
-import kotlin.time.Duration.Companion.seconds
 
-class SandboxViewModel(
-    private val sandboxRepository: SandboxRepository,
+
+class MarketViewModel(
     private val settingsRepository: SettingsRepository,
+    private val marketRepository: MarketRepository,
     private val logRepository: LogRepository
 ) : ViewModel() {
-
-    val effect = MutableSharedFlow<Effect>()
     val model = MutableStateFlow(Model())
+    val effect = MutableSharedFlow<Effect>()
 
     private val supervisorIOTradingContext =
         Dispatchers.IO + SupervisorJob() + CoroutineName("trading coroutine") //Получение цены/покупка/продажа
     private val supervisorDefaultTradingContext =
         Dispatchers.Default + SupervisorJob() + CoroutineName("trading price coroutine") //Расчёт цены
 
-
     fun onEvent(event: Event) {
         when (event) {
-            Event.Back -> {
-                viewModelScope.launch {
-                    effect.emit(Effect.Back)
-                }
-            }
-
-            Event.Init -> {
-                viewModelScope.launch {
-                    val settings = settingsRepository.getSettings()
-                    val lastSandboxAccountId: String = sandboxRepository.getLastSandboxAccountId()
-
-                    val sandboxApi: InvestApi? = if (model.value.sandboxApi == null)
-                        sandboxRepository.getSandboxApi(settings.apiTokens.sandboxToken)
-                    else
-                        model.value.sandboxApi
-
-                    if (lastSandboxAccountId.isEmpty()) {
-                        if (sandboxApi != null) {
-                            val accountId: String =
-                                sandboxRepository.sandboxService(sandboxApi = sandboxApi, figi = "")
-                            sandboxRepository.saveSandboxAccountId(accountId = accountId)
-                            val portfolio = sandboxRepository.getPortfolio(sandboxApi, accountId)
-                            val positions: MutableList<Position> =
-                                portfolio.positions
-                                    .reversed()
-                                    .toMutableList()
-
-                            model.update {
-                                it.copy(
-                                    accountId = accountId,
-                                    sandboxApi = sandboxApi,
-                                    portfolio = portfolio,
-                                    positions = positions
-                                )
-                            }
-                        }
-                    } else {
-                        if (sandboxApi != null) {
-                            val portfolio =
-                                sandboxRepository.getPortfolio(sandboxApi, lastSandboxAccountId)
-                            val positions: MutableList<Position> = portfolio.positions
-                            model.update {
-                                it.copy(
-                                    accountId = lastSandboxAccountId,
-                                    sandboxApi = sandboxApi,
-                                    portfolio = portfolio,
-                                    positions = positions
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Event.CloseAllSandboxAccounts -> {
-                sandboxRepository.closeAll(model.value.sandboxApi!!)
-                viewModelScope.launch {
-                    effect.emit(Effect.ShowSnackbar("Все аккаунты закрыты."))
-                    clearData()
-                }
-            }
-
-            is Event.ChangeMoneyValue -> {
-                model.update {
-                    it.copy(moneyValue = event.moneyValue)
-                }
-            }
-
-            Event.AddMoney -> {
-                val value = model.value.moneyValue.toIntOrNull()
-                if (value != null && model.value.accountId.isNotEmpty()) {
-                    sandboxRepository.addMoney(
-                        value = value,
-                        sandboxApi = model.value.sandboxApi!!,
-                        accountId = model.value.accountId
-                    )
-                    viewModelScope.launch(Dispatchers.IO) {
-                        delay(2.seconds)
-                        val portfolio = sandboxRepository.getPortfolio(
-                            model.value.sandboxApi!!,
-                            accountId = model.value.accountId
-                        )
-                        delay(2.seconds)
-                        withContext(Dispatchers.Main) {
-                            model.update {
-                                it.copy(
-                                    portfolio = portfolio,
-                                    moneyValue = ""
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    var msg = ""
-                    if (value == null)
-                        msg += "Неверно введена сумма пополнения.\n"
-                    if (model.value.accountId.isEmpty())
-                        msg += "Нет активного ID аккаунта."
-                    viewModelScope.launch {
-                        effect.emit(Effect.ShowSnackbar(msg))
-                    }
-                }
-            }
-
-            is Event.SearchInstrument -> {
-                viewModelScope.launch {
-                    val instrumentsBy: List<InstrumentShort> = sandboxRepository.getInstrumentsBy(
-                        sandboxApi = model.value.sandboxApi!!,
-                        id = event.id
-                    )
-                    val resultMutableList: MutableList<InstrumentShort> = mutableListOf()
-                    val sandboxApi = model.value.sandboxApi
-                    if (sandboxApi != null) {
-                        instrumentsBy.forEach {
-                            if (it.apiTradeAvailableFlag) {
-                                resultMutableList.add(it)
-                            }
-                        }
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        model.update {
-                            it.copy(instrumentsBy = resultMutableList.toList())
-                        }
-                    }
-                }
-            }
-
-            is Event.BuyLot -> {
-
-                val lots = event.lot.toIntOrNull()
-                val sandboxApi = model.value.sandboxApi
-
-                if (lots != null && sandboxApi != null)
-                    viewModelScope.launch {
-                        sandboxRepository.buy(
-                            sandboxApi = sandboxApi,
-                            lots = lots,
-                            accountId = model.value.accountId,
-                            figi = model.value.selectedFigi
-                        )
-                    }
-
-                updatePortfolio()
-            }
-
-            is Event.BuyWithMoney -> {
-                viewModelScope.launch {
-                    sandboxRepository.buyWithMoney(
-                        sandboxApi = model.value.sandboxApi!!,
-                        money = event.money,
-                        accountId = model.value.accountId,
-                        figi = model.value.selectedFigi
-                    )
-                }
-            }
-
-            is Event.SellLot -> {
-
-            }
-
-            is Event.SellWithMoney -> {
-
-            }
-
-            is Event.SelectInstrument -> {
-                model.update {
-                    it.copy(selectedFigi = event.figi)
-                }
-            }
-
             is Event.AddToTrading -> {
                 val isTrading = event.isTrading
 
@@ -239,6 +65,32 @@ class SandboxViewModel(
                 }
             }
 
+            Event.Back -> {
+                viewModelScope.launch {
+                    effect.emit(Effect.Back)
+                }
+            }
+
+            Event.Init -> {
+                viewModelScope.launch {
+                    val settings = settingsRepository.getSettings()
+                    val accountId: String = marketRepository.getMarketAccount()
+                    val api: InvestApi? = if (model.value.api == null)
+                        marketRepository.getMarketApi(settings.apiTokens.token)
+                    else
+                        model.value.api
+
+                    model.update {
+                        it.copy(
+                            api = api,
+                            accountId = accountId
+                        )
+                    }
+
+                    portfolio()
+                }
+            }
+
             is Event.StartTrading -> {
                 model.update {
                     it.copy(
@@ -247,10 +99,10 @@ class SandboxViewModel(
                 }
 
                 var msg = ""
-                if (model.value.isStartTrading)
-                    msg += "Торги начаты."
+                msg += if (model.value.isStartTrading)
+                    "Торги начаты."
                 else
-                    msg += "Торги остановлены."
+                    "Торги остановлены."
                 viewModelScope.launch {
                     effect.emit(Effect.ShowSnackbar(msg))
                 }
@@ -260,64 +112,17 @@ class SandboxViewModel(
         }
     }
 
-    private suspend fun clearData() {
-        sandboxRepository.saveSandboxAccountId(accountId = "")
-
-        withContext(Dispatchers.Main) {
-            model.update {
-                it.copy(
-                    accountId = "",
-                    portfolio = null
-                )
-            }
-        }
-    }
-
-    fun getInstrumentNameByFigi(figi: String): Instrument? {
-        val sandboxApi = model.value.sandboxApi
-        return sandboxApi?.instrumentsService?.getInstrumentByFigiSync(figi)
-    }
-
-    private fun updatePortfolio() {
-        val sandboxApi = model.value.sandboxApi
-        if (sandboxApi != null) {
-            val portfolio =
-                sandboxRepository.getPortfolio(sandboxApi, model.value.accountId)
-            val positions: MutableList<Position> = portfolio.positions
-            model.update {
-                it.copy(
-                    portfolio = portfolio,
-                    positions = positions
-                )
-            }
-        }
-    }
-
-    private fun getInstrument(figi: String): Instrument? {
-        val sandboxApi = model.value.sandboxApi
-        return sandboxApi?.instrumentsService?.getInstrumentByFigiSync(figi)
-    }
-
-    fun getCurrentPrice(runPriceStream: Boolean) {
-        if (runPriceStream) {
-            val sandboxApi = model.value.sandboxApi
-
+    private fun portfolio() {
+        val api = model.value.api
+        if (api != null) {
             viewModelScope.launch(Dispatchers.IO) {
                 while (!model.value.isStartTrading) {
-                    delay(2.seconds)
-                    if (sandboxApi != null) {
-                        val portfolio: Portfolio = sandboxRepository.getPortfolio(
-                            sandboxApi = sandboxApi,
-                            accountId = model.value.accountId
-                        )
-
-                        val positions = portfolio.positions
-                        withContext(Dispatchers.Main) {
-                            model.update {
-                                it.copy(
-                                    positions = positions
-                                )
-                            }
+                    delay(Trading.DEFAULT_UPDATE_PORTFOLIO_TICK)
+                    val portfolio =
+                        marketRepository.getPortfolio(api = api, accountId = model.value.accountId)
+                    withContext(Dispatchers.Main) {
+                        model.update {
+                            it.copy(portfolio = portfolio)
                         }
                     }
                 }
@@ -325,18 +130,26 @@ class SandboxViewModel(
         }
     }
 
+    fun getInstrumentByFigi(figi: String): Instrument? {
+        val api = model.value.api
+        return if (api != null) {
+            marketRepository.getInstrumentByFigi(api = api, figi = figi)
+        } else null
+    }
+
     private fun runTrading() {
 
         val tradingModels = model.value.tradingModels.toList()
-        val sandboxApi = model.value.sandboxApi
+        val api = model.value.api
+        val accountId = model.value.accountId
 
-        if (sandboxApi != null) {
+        if (api != null) {
             val startPricesMap = mutableMapOf<TradingModel, Money>()
             val isSoldMap = mutableMapOf<TradingModel, Boolean>()
 
-            var portfolio: Portfolio = sandboxRepository.getPortfolio(
-                sandboxApi = sandboxApi,
-                accountId = model.value.accountId
+            var portfolio: Portfolio = marketRepository.getPortfolio(
+                api = api,
+                accountId = accountId
             )
             var positions = portfolio.positions
 
@@ -352,16 +165,16 @@ class SandboxViewModel(
             val job = viewModelScope.launch(supervisorIOTradingContext) {
                 while (model.value.isStartTrading) {
                     delay(Trading.DEFAULT_TRADING_TICK_MS)
-                    portfolio = sandboxRepository.getPortfolio(
-                        sandboxApi = sandboxApi,
-                        accountId = model.value.accountId
+                    portfolio = marketRepository.getPortfolio(
+                        api = api,
+                        accountId = accountId
                     )
                     positions = portfolio.positions
 
                     tradingModels.forEachIndexed { _, tradingModel ->
                         positions.forEachIndexed { _, position ->
                             if (tradingModel.figi == position.figi) {
-                                val instrument = getInstrument(figi = tradingModel.figi)
+                                val instrument = getInstrumentByFigi(figi = tradingModel.figi)
                                 val isSold = isSoldMap.getOrDefault(tradingModel, false)
                                 val lots = tradingModel.countLots
                                 withContext(supervisorDefaultTradingContext) {
@@ -396,8 +209,8 @@ class SandboxViewModel(
                                             if (isSold) {
                                                 val money = Money.fromResponse(moneyValue)
                                                 withContext(supervisorIOTradingContext) {
-                                                    sandboxRepository.buyWithLots(
-                                                        sandboxApi = sandboxApi,
+                                                    marketRepository.buyWithLots(
+                                                        api = api,
                                                         lots = lots,
                                                         accountId = model.value.accountId,
                                                         figi = tradingModel.figi,
@@ -419,6 +232,10 @@ class SandboxViewModel(
                                             operation = "HOLD"
                                             println("-->$operation<--\n=====================================")
                                         }
+                                    } else {
+                                        //HOLD
+                                        operation = "HOLD"
+                                        println("-->$operation<--\n=====================================")
                                     }
                                     if (percentChange > 0) {
                                         if (percentChange >= increasePercent) {
@@ -426,8 +243,8 @@ class SandboxViewModel(
                                             if (!isSold) {
                                                 val money = Money.fromResponse(moneyValue)
                                                 withContext(supervisorIOTradingContext) {
-                                                    sandboxRepository.sellWithLots(
-                                                        sandboxApi = sandboxApi,
+                                                    marketRepository.sellWithLots(
+                                                        api = api,
                                                         lots = tradingModel.countLots,
                                                         accountId = model.value.accountId,
                                                         figi = tradingModel.figi,
@@ -446,6 +263,10 @@ class SandboxViewModel(
                                             operation = "HOLD"
                                             println("-->$operation<--\n=====================================")
                                         }
+                                    } else {
+                                        //HOLD
+                                        operation = "HOLD"
+                                        println("-->$operation<--\n=====================================")
                                     }
                                     if (percentChange == 0.0) {
                                         //HOLD
@@ -455,7 +276,8 @@ class SandboxViewModel(
 
                                     withContext(supervisorIOTradingContext) {
                                         logRepository.write(
-                                            LogTradingOperation(
+                                            logMode = LogMode.MARKET,
+                                            logTradingOperation = LogTradingOperation(
                                                 accountId = model.value.accountId,
                                                 name = instrument?.name
                                                     ?: "${tradingModel.figi}_name_unspecified",

@@ -1,4 +1,4 @@
-package ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account
+package ru.plumsoftware.ui.presentation.screens.select.sandbox
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,9 +11,9 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepository
 import ru.plumsoftware.core.settings.repository.SettingsRepository
-import ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.model.Effect
-import ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.model.Event
-import ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.model.Model
+import ru.plumsoftware.ui.presentation.screens.select.sandbox.model.Effect
+import ru.plumsoftware.ui.presentation.screens.select.sandbox.model.Event
+import ru.plumsoftware.ui.presentation.screens.select.sandbox.model.Model
 
 class SelectSandboxAccountViewModel(
     private val settingsRepository: SettingsRepository,

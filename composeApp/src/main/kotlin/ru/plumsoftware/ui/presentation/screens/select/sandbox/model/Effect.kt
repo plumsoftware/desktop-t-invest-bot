@@ -1,4 +1,4 @@
-package ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.model
+package ru.plumsoftware.ui.presentation.screens.select.sandbox.model
 
 sealed class Effect {
     data object OpenSandbox : Effect()

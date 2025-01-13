@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import ru.plumsoftware.core.brokerage.mappers.fromInstrumentTypeStrToRuStr
 import ru.plumsoftware.core.brokerage.sandbox.model.Sandbox
 import ru.plumsoftware.ui.components.CounterButton
-import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.theme.Space
 import ru.plumsoftware.ui.theme.disabled
 import ru.tinkoff.piapi.contract.v1.Instrument
@@ -49,7 +48,7 @@ fun MarketCard(
     position: Position,
     isStartTrading: Boolean,
     getInstrument: (String) -> Instrument?,
-    onEvent: (Event) -> Unit,
+    onCheckedChange: (String, Int, String, String, Boolean) -> Unit,
 ) {
 
     val instrument = getInstrument(position.figi)
@@ -215,15 +214,12 @@ fun MarketCard(
                         onCheckedChange = {
                             checked = it
                             enabledCard = !checked
-
-                            onEvent(
-                                Event.AddToTrading(
-                                    figi = instrument.figi,
-                                    countLots = value,
-                                    increase = increase,
-                                    decrease = decrease,
-                                    isTrading = checked
-                                )
+                            onCheckedChange.invoke(
+                                instrument.figi,
+                                value,
+                                increase,
+                                decrease,
+                                checked
                             )
                         }
                     )

@@ -16,13 +16,15 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import ru.plumsoftware.core.brokerage.market.MarketRepositoryImpl
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
-import ru.plumsoftware.core.history.repository.HistoryRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
 import ru.plumsoftware.log.repository.LogRepositoryImpl
-import ru.plumsoftware.ui.presentation.dialogs.select_sandbox_account.SelectSandboxAccount
+import ru.plumsoftware.ui.presentation.screens.select.sandbox.SelectSandboxAccount
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
+import ru.plumsoftware.ui.presentation.screens.market.MarketScreen
 import ru.plumsoftware.ui.presentation.screens.sandbox.SandboxScreen
+import ru.plumsoftware.ui.presentation.screens.select.market.SelectMarketAccount
 import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
 import ru.plumsoftware.ui.theme.AppTheme
@@ -31,8 +33,8 @@ fun main(): Unit = runBlocking {
 
     val settingsRepository = SettingsRepositoryImpl()
     val sandboxRepository = SandboxRepositoryImpl()
-    val historyRepository = HistoryRepositoryImpl()
     val logRepository = LogRepositoryImpl()
+    val marketRepository = MarketRepositoryImpl()
 
     val saveIOContext = Dispatchers.IO + SupervisorJob()
     val scope = CoroutineScope(saveIOContext)
@@ -85,6 +87,21 @@ fun main(): Unit = runBlocking {
                                 navigator = navigator,
                                 sandboxRepository = sandboxRepository,
                                 settingsRepository = settingsRepository,
+                            )
+                        }
+                        scene(route = DesktopRouting.selectMarketAccountId) {
+                            SelectMarketAccount(
+                                navigator = navigator,
+                                marketRepository = marketRepository,
+                                settingsRepository = settingsRepository,
+                            )
+                        }
+                        scene(route = DesktopRouting.market) {
+                            MarketScreen(
+                                navigator = navigator,
+                                settingsRepository = settingsRepository,
+                                marketRepository = marketRepository,
+                                logRepository = logRepository
                             )
                         }
                     }

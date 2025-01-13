@@ -33,9 +33,9 @@ import ru.plumsoftware.ui.components.TopBar
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Effect
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.theme.Space
-import ru.plumsoftware.ui.components.sandbox_tabs.PortfolioTab
-import ru.plumsoftware.ui.components.sandbox_tabs.InstrumentsTab
-import ru.plumsoftware.ui.components.sandbox_tabs.MarketTab
+import ru.plumsoftware.ui.components.tabs.PortfolioTab
+import ru.plumsoftware.ui.components.tabs.InstrumentsTab
+import ru.plumsoftware.ui.components.tabs.MarketTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +149,7 @@ fun SandboxScreen(
                 PortfolioTab(
                     model = model,
                     onEvent = viewModel::onEvent,
-                    getName = viewModel::getInstrumentNameByFigi
+                    getInstrument = viewModel::getInstrumentNameByFigi
                 )
             }
             if (selectedTabIndex == 1) {
@@ -157,9 +157,22 @@ fun SandboxScreen(
             }
             if (selectedTabIndex == 2) {
                 MarketTab(
-                    model = model,
-                    onEvent = viewModel::onEvent,
-                    getInstrument = viewModel::getInstrument,
+                    positions = model.value.portfolio?.positions,
+                    getInstrument = viewModel::getInstrumentNameByFigi,
+                    onCheckedChange = { figi, value, increase, decrease, checked ->
+                        viewModel.onEvent(
+                            Event.AddToTrading(
+                                figi = figi,
+                                countLots = value,
+                                increase = increase,
+                                decrease = decrease,
+                                isTrading = checked
+                            )
+                        )
+                    },
+                    onStartTrading = { isStartTrading ->
+                        viewModel.onEvent(Event.StartTrading(isStartTrading = isStartTrading))
+                    }
                 )
             }
         }

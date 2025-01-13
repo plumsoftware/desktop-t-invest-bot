@@ -3,7 +3,7 @@ package ru.plumsoftware.log.model
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-data class LogSandbox(
+data class LogTradingOperation(
     val accountId: String,
     val name: String,
     val figi: String,

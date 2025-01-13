@@ -1,4 +1,4 @@
-package ru.plumsoftware.ui.components.sandbox_tabs
+package ru.plumsoftware.ui.components.tabs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,9 +14,10 @@ import ru.plumsoftware.ui.components.list.PositionsList2
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Event
 import ru.plumsoftware.ui.presentation.screens.sandbox.model.Model
 import ru.plumsoftware.ui.theme.Space
+import ru.tinkoff.piapi.contract.v1.Instrument
 
 @Composable
-fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit, getName: (String) -> String) {
+fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit, getInstrument: (String) -> Instrument?) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -33,5 +34,5 @@ fun PortfolioTab(model: State<Model>, onEvent: (Event) -> Unit, getName: (String
         PortfolioComposable(model = model, onEvent = onEvent)
     }
 
-    PositionsList2(model = model, getName = getName)
+    PositionsList2(model = model, getInstrument = getInstrument)
 }
