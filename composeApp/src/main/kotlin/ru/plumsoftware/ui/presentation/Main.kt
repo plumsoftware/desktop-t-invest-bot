@@ -2,6 +2,9 @@ package ru.plumsoftware.ui.presentation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
@@ -16,6 +19,7 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import org.jetbrains.compose.resources.InternalResourceApi
 import ru.plumsoftware.core.brokerage.market.MarketRepositoryImpl
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
@@ -29,6 +33,7 @@ import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
 import ru.plumsoftware.ui.theme.AppTheme
 
+@OptIn(InternalResourceApi::class)
 fun main(): Unit = runBlocking {
 
     val settingsRepository = SettingsRepositoryImpl()
@@ -50,6 +55,7 @@ fun main(): Unit = runBlocking {
 
         Window(
             onCloseRequest = ::exitApplication,
+            icon = BitmapPainter(useResource("logo.png", ::loadImageBitmap)),
             title = "T инвест бот",
             state = windowState,
         ) {

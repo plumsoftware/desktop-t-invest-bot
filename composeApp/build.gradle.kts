@@ -1,5 +1,20 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
+val macExtraPlistKeys: String
+    get() = """
+      <key>CFBundleURLTypes</key>
+      <array>
+        <dict>
+          <key>CFBundleURLName</key>
+          <string>Example deep link</string>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>compose</string>
+          </array>
+        </dict>
+      </array>
+    """
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization").version(libs.versions.kotlin)
@@ -62,6 +77,39 @@ compose.desktop {
             )
             packageName = "ru.plumsoftware"
             packageVersion = "1.0.0"
+
+            description =
+                "Это программа для торговли с использованием Т инвестиции. Разработчик: Владелец этого аккаунта."
+            copyright = "© 2024 владелец этого аккаунта All rights reserved."
+            vendor = "plumsoftware"
+            licenseFile.set(project.file("LICENSE.txt"))
+
+            windows {
+                packageVersion = "1.0.0"
+                msiPackageVersion = "1.0.0"
+                exePackageVersion = "1.0.0"
+                iconFile.set(project.file("logo.ico"))
+            }
+            macOS {
+                packageVersion = "1.0.0"
+                dmgPackageVersion = "1.0.0"
+                pkgPackageVersion = "1.0.0"
+                packageBuildVersion = "1.0.0"
+                dmgPackageBuildVersion = "1.0.0"
+                pkgPackageBuildVersion = "1.0.0"
+                iconFile.set(project.file("logo.icns"))
+
+                bundleID = "ru.plumsoftware"
+                infoPlist {
+                    extraKeysRawXml = macExtraPlistKeys
+                }
+            }
+            linux {
+                packageVersion = "1.0.0"
+                debPackageVersion = "1.0.0"
+                rpmPackageVersion = "1.0.0"
+                iconFile.set(project.file("logo.png"))
+            }
         }
     }
 }
