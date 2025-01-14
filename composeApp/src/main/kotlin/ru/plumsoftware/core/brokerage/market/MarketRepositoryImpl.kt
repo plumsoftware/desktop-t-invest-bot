@@ -9,7 +9,6 @@ import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.contract.v1.OrderDirection
 import ru.tinkoff.piapi.contract.v1.OrderType
 import ru.tinkoff.piapi.core.InvestApi
-import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Quantity
 import java.io.File
@@ -58,27 +57,7 @@ class MarketRepositoryImpl : MarketRepository {
         lots: Int,
         accountId: String,
         figi: String,
-        price: Money
     ): String {
-//        val bigDecimal = price.value
-//        val quotation = Quotation.newBuilder()
-//            .setUnits(bigDecimal.toLong())
-//            .setNano(
-//                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
-//                    .toInt()
-//            )
-//            .build()
-//
-//        val orderId = api.ordersService
-//            .postOrderSync(
-//                figi,
-//                lots.toLong(),
-//                quotation,
-//                OrderDirection.ORDER_DIRECTION_BUY,
-//                accountId,
-//                OrderType.ORDER_TYPE_LIMIT,
-//                UUID.randomUUID().toString()
-//            ).getOrderId()
 
         val lastPrice = api.marketDataService.getLastPricesSync(listOf(figi))[0].price
         val minPriceIncrement =
@@ -106,7 +85,7 @@ class MarketRepositoryImpl : MarketRepository {
             UUID.randomUUID().toString()
         ).getOrderId()
 
-        println("Заявка на покупку $lots лотов инструмента с figi $figi номер: $orderId. Цена ${price.value}")
+        println("Заявка на покупку $lots лотов инструмента с figi $figi номер: $orderId. Цена ${newPrice.units}.${newPrice.nano}")
         return orderId
     }
 
@@ -115,27 +94,7 @@ class MarketRepositoryImpl : MarketRepository {
         lots: Int,
         accountId: String,
         figi: String,
-        price: Money
     ): String {
-//        val bigDecimal = price.value
-//        val quotation = Quotation.newBuilder()
-//            .setUnits(bigDecimal.toLong())
-//            .setNano(
-//                bigDecimal.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1_000_000_000))
-//                    .toInt()
-//            )
-//            .build()
-//
-//        val orderId = api.ordersService
-//            .postOrderSync(
-//                figi,
-//                lots.toLong(),
-//                quotation,
-//                OrderDirection.ORDER_DIRECTION_SELL,
-//                accountId,
-//                OrderType.ORDER_TYPE_LIMIT,
-//                UUID.randomUUID().toString()
-//            ).getOrderId()
 
         val lastPrice = api.marketDataService.getLastPricesSync(listOf(figi))[0].price
         val minPriceIncrement =
@@ -163,7 +122,7 @@ class MarketRepositoryImpl : MarketRepository {
             UUID.randomUUID().toString()
         ).getOrderId();
 
-        println("Заявка на продажу $lots лотов инструмента с figi $figi номер: $orderId. Цена ${price.value}")
+        println("Заявка на продажу $lots лотов инструмента с figi $figi номер: $orderId. Цена ${newPrice.units}.${newPrice.nano}")
         return orderId
     }
 

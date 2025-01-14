@@ -2,7 +2,9 @@ package ru.plumsoftware.ui.presentation.screens.market
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +25,7 @@ import ru.plumsoftware.ui.presentation.screens.market.model.Event
 import ru.plumsoftware.ui.presentation.screens.market.model.Model
 import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.contract.v1.MoneyValue
+import ru.tinkoff.piapi.contract.v1.OrderState
 import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
@@ -146,7 +149,8 @@ class MarketViewModel(
         if (api != null) {
             val startPricesMap = mutableMapOf<TradingModel, Money>()
             val isSoldMap = mutableMapOf<TradingModel, Boolean>()
-            val orderMap = mutableMapOf<TradingModel, String>()
+            val lastOrdersIdMap = mutableMapOf<TradingModel, String>()
+            val jobs = mutableListOf<Job>()
 
             var portfolio: Portfolio = marketRepository.getPortfolio(
                 api = api,
@@ -175,137 +179,137 @@ class MarketViewModel(
                     tradingModels.forEachIndexed { _, tradingModel ->
                         positions.forEachIndexed { _, position ->
                             if (tradingModel.figi == position.figi) {
-                                val instrument = getInstrumentByFigi(figi = tradingModel.figi)
-                                val isSold = isSoldMap.getOrDefault(tradingModel, false)
-                                val lastOrder = orderMap.getOrDefault(tradingModel, "")
-                                val lots = tradingModel.countLots
-                                withContext(supervisorDefaultTradingContext) {
-                                    val increasePercent = tradingModel.increase
-                                    val decreasePercent = tradingModel.decrease
+                                val job = viewModelScope.launch(supervisorIOTradingContext) {
+                                    val instrument = getInstrumentByFigi(figi = tradingModel.figi)
+                                    val isSold = isSoldMap.getOrDefault(tradingModel, false)
+                                    val lastOrderId = lastOrdersIdMap.getOrDefault(tradingModel, "")
+                                    val lots = tradingModel.countLots
+                                    withContext(supervisorDefaultTradingContext) {
+                                        val increasePercent = tradingModel.increase
+                                        val decreasePercent = tradingModel.decrease
+                                        var operation = ""
+                                        val currentPrice = position.currentPrice.value.toDouble()
+                                        val oldPrice =
+                                            startPricesMap[tradingModel]?.value?.toDouble() ?: 0.0
 
-                                    val currentPrice = position.currentPrice.value.toDouble()
-                                    val oldPrice =
-                                        startPricesMap[tradingModel]?.value?.toDouble() ?: 0.0
+                                        val percentChange =
+                                            ((currentPrice - oldPrice) / oldPrice) * 100
 
-                                    val percentChange =
-                                        ((currentPrice - oldPrice) / oldPrice) * 100
+                                        println("name: ${instrument?.name}" + "\n" + "figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
 
-                                    println("name: ${instrument?.name}" + "\n" + "figi: ${tradingModel.figi}" + "\n" + "last price: $oldPrice" + "\n" + "current price: $currentPrice" + "\n" + "percent change: $percentChange" + "\n" + "=====================================")
-
-                                    var operation = ""
-
-                                    val bidDecimal = BigDecimal.valueOf(currentPrice)
-                                    val moneyValue = MoneyValue.newBuilder()
-                                        .setCurrency("RUB")
-                                        .setUnits(bidDecimal.toLong())
-                                        .setNano(
-                                            bidDecimal.remainder(BigDecimal.ONE)
-                                                .multiply(BigDecimal.valueOf(1_000_000_000))
-                                                .toInt()
-                                        )
-                                        .build()
-
-                                    if (percentChange < 0) {
-                                        if ((percentChange * -1) >= decreasePercent) {
-                                            //BUY
-                                            val orders = api.ordersService.getOrdersSync(accountId)
-                                            orders.forEach {
-                                                if (it.orderId != lastOrder) {
-                                                    isSoldMap[tradingModel] = false
-                                                }
-                                            }
-                                            if (isSold) {
-                                                val money = Money.fromResponse(moneyValue)
-                                                withContext(supervisorIOTradingContext) {
-                                                    val orderId = marketRepository.buyWithLots(
-                                                        api = api,
-                                                        lots = lots,
-                                                        accountId = model.value.accountId,
-                                                        figi = tradingModel.figi,
-                                                        price = money
-                                                    )
-                                                    orderMap[tradingModel] = orderId
-
-                                                    //Change old price
-                                                    startPricesMap[tradingModel] = money
-                                                }
-
-                                                operation = "BUY"
-                                                println("-->$operation<--\n=====================================")
-
-                                            }
-                                        } else {
-                                            //HOLD
-                                            operation = "HOLD"
-                                            println("-->$operation<--\n=====================================")
-                                        }
-                                    } else {
-                                        //HOLD
-                                        operation = "HOLD"
-                                        println("-->$operation<--\n=====================================")
-                                    }
-                                    if (percentChange > 0) {
-                                        if (percentChange >= increasePercent) {
-                                            //SELL
-                                            val orders = api.ordersService.getOrdersSync(accountId)
-                                            orders.forEach {
-                                                if (it.orderId != lastOrder) {
-                                                    isSoldMap[tradingModel] = true
-                                                }
-                                            }
-                                            if (!isSold) {
-                                                val money = Money.fromResponse(moneyValue)
-                                                withContext(supervisorIOTradingContext) {
-                                                    val orderId = marketRepository.sellWithLots(
-                                                        api = api,
-                                                        lots = lots,
-                                                        accountId = model.value.accountId,
-                                                        figi = tradingModel.figi,
-                                                        price = money
-                                                    )
-                                                    orderMap[tradingModel] = orderId
-                                                    //Change old price
-                                                    startPricesMap[tradingModel] = money
-                                                }
-                                                operation = "SELL"
-
-                                                println("-->$operation<--\n=====================================")
-                                            }
-                                        } else {
-                                            //HOLD
-                                            operation = "HOLD"
-                                            println("-->$operation<--\n=====================================")
-                                        }
-                                    } else {
-                                        //HOLD
-                                        operation = "HOLD"
-                                        println("-->$operation<--\n=====================================")
-                                    }
-                                    if (percentChange == 0.0) {
-                                        //HOLD
-                                        operation = "HOLD"
-                                        println("-->$operation<--\n=====================================")
-                                    }
-
-                                    withContext(supervisorIOTradingContext) {
-                                        logRepository.write(
-                                            logMode = LogMode.MARKET,
-                                            logTradingOperation = LogTradingOperation(
-                                                accountId = model.value.accountId,
-                                                name = instrument?.name
-                                                    ?: "${tradingModel.figi}_name_unspecified",
-                                                figi = tradingModel.figi,
-                                                countLots = tradingModel.countLots.toString(),
-                                                currentPrice = currentPrice.toString(),
-                                                lastPrice = startPricesMap[tradingModel]?.value.toString() + " " + startPricesMap[tradingModel]?.currency,
-                                                percentIncrease = tradingModel.increase.toString(),
-                                                percentDecrease = tradingModel.decrease.toString(),
-                                                currentPercentChange = percentChange.toString(),
-                                                operation = operation
+                                        val bidDecimal = BigDecimal.valueOf(currentPrice)
+                                        val moneyValue = MoneyValue.newBuilder()
+                                            .setCurrency("RUB")
+                                            .setUnits(bidDecimal.toLong())
+                                            .setNano(
+                                                bidDecimal.remainder(BigDecimal.ONE)
+                                                    .multiply(BigDecimal.valueOf(1_000_000_000))
+                                                    .toInt()
                                             )
-                                        )
+                                            .build()
+
+                                        if (percentChange < 0) {
+                                            if ((percentChange * -1) >= decreasePercent) {
+                                                //BUY
+                                                val ordersSync =
+                                                    api.ordersService.getOrdersSync(accountId)
+                                                if (ordersSync.isEmpty()) {
+                                                    isSoldMap[tradingModel] = false
+                                                } else {
+                                                    ordersSync.forEach { order ->
+                                                        if (order.orderId != lastOrderId && order.figi == tradingModel.figi) {
+                                                            isSoldMap[tradingModel] = false
+                                                        }
+                                                    }
+                                                }
+                                                if (isSold) {
+                                                    val money = Money.fromResponse(moneyValue)
+                                                    withContext(supervisorIOTradingContext) {
+                                                        val orderId = marketRepository.buyWithLots(
+                                                            api = api,
+                                                            lots = lots,
+                                                            accountId = model.value.accountId,
+                                                            figi = tradingModel.figi,
+                                                        )
+                                                        lastOrdersIdMap[tradingModel] = orderId
+
+                                                        //Change old price
+                                                        startPricesMap[tradingModel] = money
+                                                    }
+
+                                                    operation = "BUY"
+                                                    println("-->$operation<--\n=====================================")
+
+                                                }
+                                            } else {
+                                                //HOLD
+                                                operation = "HOLD"
+                                                println("-->$operation<--\n=====================================")
+                                            }
+                                        } else if (percentChange > 0) {
+                                            if (percentChange >= increasePercent) {
+                                                //SELL
+                                                val ordersSync: MutableList<OrderState> =
+                                                    api.ordersService.getOrdersSync(accountId)
+                                                if (ordersSync.isEmpty()) {
+                                                    isSoldMap[tradingModel] = true
+                                                } else {
+                                                    ordersSync.forEach { order ->
+                                                        if (order.orderId != lastOrderId && order.figi == tradingModel.figi) {
+                                                            isSoldMap[tradingModel] = true
+                                                        }
+                                                    }
+                                                }
+                                                if (!isSold) {
+                                                    val money = Money.fromResponse(moneyValue)
+                                                    withContext(supervisorIOTradingContext) {
+                                                        val orderId = marketRepository.sellWithLots(
+                                                            api = api,
+                                                            lots = lots,
+                                                            accountId = model.value.accountId,
+                                                            figi = tradingModel.figi,
+                                                        )
+                                                        lastOrdersIdMap[tradingModel] = orderId
+
+                                                        //Change old price
+                                                        startPricesMap[tradingModel] = money
+                                                    }
+                                                    operation = "SELL"
+
+                                                    println("-->$operation<--\n=====================================")
+                                                }
+                                            } else {
+                                                //HOLD
+                                                operation = "HOLD"
+                                                println("-->$operation<--\n=====================================")
+                                            }
+                                        } else {
+                                            //HOLD
+                                            operation = "HOLD"
+                                            println("-->$operation<--\n=====================================")
+                                        }
+
+                                        withContext(supervisorIOTradingContext) {
+                                            logRepository.write(
+                                                logMode = LogMode.MARKET,
+                                                logTradingOperation = LogTradingOperation(
+                                                    accountId = model.value.accountId,
+                                                    name = instrument?.name
+                                                        ?: "${tradingModel.figi}_name_unspecified",
+                                                    figi = tradingModel.figi,
+                                                    countLots = tradingModel.countLots.toString(),
+                                                    currentPrice = currentPrice.toString(),
+                                                    lastPrice = startPricesMap[tradingModel]?.value.toString() + " " + startPricesMap[tradingModel]?.currency,
+                                                    percentIncrease = tradingModel.increase.toString(),
+                                                    percentDecrease = tradingModel.decrease.toString(),
+                                                    currentPercentChange = percentChange.toString(),
+                                                    operation = operation
+                                                )
+                                            )
+                                        }
                                     }
                                 }
+                                jobs.add(job)
                             }
                         }
                     }
@@ -313,6 +317,7 @@ class MarketViewModel(
             }
 
             if (!model.value.isStartTrading) {
+                job.cancelChildren()
                 job.cancel()
             }
         }
