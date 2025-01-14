@@ -125,7 +125,9 @@ class MarketViewModel(
                         marketRepository.getPortfolio(api = api, accountId = model.value.accountId)
                     withContext(Dispatchers.Main) {
                         model.update {
-                            it.copy(portfolio = portfolio)
+                            it.copy(
+                                portfolio = portfolio,
+                            )
                         }
                     }
                 }
@@ -317,8 +319,20 @@ class MarketViewModel(
             }
 
             if (!model.value.isStartTrading) {
+                viewModelScope.launch(supervisorIOTradingContext) {
+                    val totalAmountPortfolio = marketRepository.getPortfolio(
+                        api = api,
+                        accountId = accountId
+                    ).totalAmountPortfolio
+                    withContext(viewModelScope.coroutineContext) {
+                        model.update {
+                            it.copy(stopTradingTotalAmountPortfolio = totalAmountPortfolio)
+                        }
+                    }
+                }
                 job.cancelChildren()
                 job.cancel()
+                portfolio()
             }
         }
     }
