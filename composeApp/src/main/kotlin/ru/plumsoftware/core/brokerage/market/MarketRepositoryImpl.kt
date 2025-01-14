@@ -14,6 +14,7 @@ import ru.tinkoff.piapi.core.models.Quantity
 import java.io.File
 import java.math.BigDecimal
 import java.util.UUID
+import javax.sound.sampled.AudioSystem
 
 
 class MarketRepositoryImpl : MarketRepository {
@@ -86,6 +87,7 @@ class MarketRepositoryImpl : MarketRepository {
         ).getOrderId()
 
         println("Заявка на покупку $lots лотов инструмента с figi $figi номер: $orderId. Цена ${newPrice.units}.${newPrice.nano}")
+        playSound()
         return orderId
     }
 
@@ -123,6 +125,7 @@ class MarketRepositoryImpl : MarketRepository {
         ).getOrderId();
 
         println("Заявка на продажу $lots лотов инструмента с figi $figi номер: $orderId. Цена ${newPrice.units}.${newPrice.nano}")
+        playSound()
         return orderId
     }
 
@@ -158,5 +161,13 @@ class MarketRepositoryImpl : MarketRepository {
                 file.writeBytes(encode(MarketConfig(Acc())).encodeToByteArray())
             }
         }
+    }
+
+    private fun playSound() {
+        val audioInputStream =
+            AudioSystem.getAudioInputStream(Thread.currentThread().contextClassLoader.getResource("positive_notification_1.wav"))
+        val clip = AudioSystem.getClip()
+        clip.open(audioInputStream)
+        clip.start()
     }
 }
