@@ -75,7 +75,7 @@ compose.desktop {
                 TargetFormat.Msi, TargetFormat.Exe, //Windows
                 TargetFormat.Deb, TargetFormat.Rpm //Linux
             )
-            packageName = "ru.plumsoftware"
+            packageName = "Торговый робот"
             packageVersion = "1.0.0"
 
             description =
