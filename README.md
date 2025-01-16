@@ -1,11 +1,14 @@
-This is a Kotlin Multiplatform project targeting Desktop.
+# Торговый робот
+Это торговый робот для Т инвестиции с возможностью торговли внутри дня на Московской бирже. Программа представляет собой Desktop приложение разработанное на фреймворке Compose Multiplatform с применением технологии Kotlin multiplatform.
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+### Запуск
+Для сборки исполняемого файла (```.exe``` и т.п.) нужно запустить в терминале команду ```./gradle runDistributable```. После завершения в терминале можно увидеть месположение исполняемого файла и прочих модулей. 
 
+### Настройка
+В начале нужно скопировать токены для вашего брокерского счёта, с которого будут вестить торги, и для песочницы. Их можно взять в личном кабинете Т банка.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+### Торговля
+#### Песочница
+Для торговли в песочнице нужно пополнить счёт, купить активы и запустить торговлю.
+#### Мос. биржа
+Для торговле на Мос. бирже, нужно приобрести хотя бы 1 актив. После чего произвести натсройку процента волатильности для покупки/продажи и запустить торговлю, не закрываю программу. Также компьютер или ноутбук не должен уходить в спящий режим.
