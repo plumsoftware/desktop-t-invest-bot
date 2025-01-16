@@ -3,6 +3,7 @@ package ru.plumsoftware.core.brokerage.market
 import ru.tinkoff.piapi.contract.v1.Account
 import ru.tinkoff.piapi.contract.v1.Instrument
 import ru.tinkoff.piapi.core.InvestApi
+import ru.tinkoff.piapi.core.models.Money
 import ru.tinkoff.piapi.core.models.Portfolio
 
 interface MarketRepository {
@@ -19,11 +20,11 @@ interface MarketRepository {
         lots: Int,
         accountId: String,
         figi: String,
-    ) : String
+    ) : Pair<String, Money>
     suspend fun sellWithLots(
         api: InvestApi,
         lots: Int,
         accountId: String,
         figi: String,
-    ) : String
+    ) : Pair<String, Money>
 }
