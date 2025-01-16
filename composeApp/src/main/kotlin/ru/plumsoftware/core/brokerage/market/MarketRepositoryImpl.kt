@@ -88,7 +88,7 @@ class MarketRepositoryImpl : MarketRepository {
             newPrice,
             OrderDirection.ORDER_DIRECTION_BUY,
             accountId,
-            OrderType.ORDER_TYPE_MARKET,
+            OrderType.ORDER_TYPE_LIMIT,
             UUID.randomUUID().toString()
         ).orderId
 
@@ -129,7 +129,7 @@ class MarketRepositoryImpl : MarketRepository {
             newPrice,
             OrderDirection.ORDER_DIRECTION_SELL,
             accountId,
-            OrderType.ORDER_TYPE_MARKET,
+            OrderType.ORDER_TYPE_LIMIT,
             UUID.randomUUID().toString()
         ).orderId
 
