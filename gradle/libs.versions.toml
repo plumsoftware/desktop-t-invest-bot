@@ -1,0 +1,101 @@
+[versions]
+junit = "4.13.2"
+kotlin = "1.9.25"
+kotlinx-coroutines = "1.9.0"
+precompose = "1.6.0"
+material3 = "1.2.1"
+serialization-json = "1.6.3"
+compose = "1.7.0"
+
+#Android
+runner = "1.0.2"
+espresso-core = "3.0.2"
+appcompat-v7 = "28.0.0"
+agp = "8.7.3"
+coreKtx = "1.15.0"
+junitVersion = "1.2.1"
+lifecycleRuntimeKtx = "2.6.1"
+activityCompose = "1.9.3"
+composeBom = "2024.04.01"
+
+#Server
+h2-version = "2.3.232"
+koin-version = "3.5.6"
+ktor-version = "2.3.11"
+logback-version = "1.4.14"
+postgres-version = "42.7.5"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
+#Precompose
+precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
+precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
+precompose-molecule = { module = "moe.tlaster:precompose-molecule", version.ref = "precompose" }
+
+#Material
+material3 = { module = "org.jetbrains.compose.material3:material3-desktop", version.ref = "material3" }
+
+#Serialization
+serialization-json-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm", version.ref = "serialization-json" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
+
+#Android specific
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+#Server specific
+koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin-version" }
+koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin-version" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-version" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres-version" }
+h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
+ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor-version" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor-version" }
+ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor-version" }
+ktor-server-caching-headers = { module = "io.ktor:ktor-server-caching-headers", version.ref = "ktor-version" }
+ktor-server-host-common = { module = "io.ktor:ktor-server-host-common", version.ref = "ktor-version" }
+ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor-version" }
+ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor-version" }
+ktor-server-webjars = { module = "io.ktor:ktor-server-webjars", version.ref = "ktor-version" }
+jquery = { module = "org.webjars:jquery", version = "3.2.1" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor-version" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor-version" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor-version" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor-version" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
+ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }
+ktor-server-core-jvm = {module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version"}
+ktor-server-netty-jvm = {module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor-version"}
+ktor-server-test-host-jvm = {module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor-version"}
+
+[plugins]
+composeCompiler = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+
+#Android
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+#Server
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
