@@ -1,4 +1,4 @@
-package ru.plumsoftware.model.receive
+package ru.plumsoftware.net.core.model.receive
 
 import kotlinx.serialization.Serializable
 

@@ -1,7 +1,7 @@
 package ru.plumsoftware.service.auth
 
-import ru.plumsoftware.model.dto.UserDto
-import ru.plumsoftware.model.receive.TTokensReceive
+import ru.plumsoftware.net.core.model.dto.UserDto
+import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.service.auth.database.NamesTable
 import ru.plumsoftware.service.auth.database.PasswordsTable
 import ru.plumsoftware.service.auth.database.PhonesTable

@@ -29,6 +29,8 @@ exposedDao = "0.43.0"
 springSecurityCrypto = "6.4.2"
 bcprovJdk15on = "1.64"
 commonsLogging = "1.3.4"
+appcompat = "1.7.0"
+material = "1.12.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -99,6 +101,8 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres-ver
 spring-security-crypto = { module = "org.springframework.security:spring-security-crypto", version.ref = "springSecurityCrypto" }
 bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15on" }
 commons-logging = { module = "commons-logging:commons-logging", version.ref = "commonsLogging" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 composeCompiler = { id = "org.jetbrains.compose", version.ref = "compose" }
@@ -112,3 +116,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }

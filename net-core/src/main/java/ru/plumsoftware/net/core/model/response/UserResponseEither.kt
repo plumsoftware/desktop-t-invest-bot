@@ -1,4 +1,4 @@
-package ru.plumsoftware.model.response
+package ru.plumsoftware.net.core.model.response
 
 import kotlinx.serialization.Serializable
 

@@ -3,7 +3,7 @@ package ru.plumsoftware.service.auth.database
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import ru.plumsoftware.model.dto.TTokensDto
+import ru.plumsoftware.net.core.model.dto.TTokensDto
 
 object TTokensTable : Table("t_tokens") {
     private val id = TTokensTable.long("id")

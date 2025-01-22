@@ -8,11 +8,8 @@ plugins {
 group = "ru.plumsoftware"
 version = "0.0.1"
 
-application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
-}
-
 dependencies {
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${libs.versions.kotlin}")
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.netty.jvm)
@@ -31,23 +28,4 @@ dependencies {
     //Json
     implementation(libs.serialization.json)
     implementation(libs.serialization.json.jvm)
-
-    //Database
-    implementation(libs.exposed.core)
-    implementation(libs.exposed.dao)
-    implementation(libs.exposed.jdbc)
-    implementation(libs.postgresql)
-
-    //Hash
-    implementation(libs.spring.security.crypto)
-    implementation(libs.bcprov.jdk15on)
-
-    //Logging
-    implementation(libs.commons.logging)
-
-    //Auth
-    implementation(libs.ktor.server.auth)
-
-    //Modules
-    implementation(project(path = ":net-core"))
 }

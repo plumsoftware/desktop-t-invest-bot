@@ -1,8 +1,8 @@
 package ru.plumsoftware.facade
 
-import ru.plumsoftware.model.dto.UserDto
-import ru.plumsoftware.model.receive.UserReceive
-import ru.plumsoftware.model.response.UserResponseEither
+import ru.plumsoftware.net.core.model.dto.UserDto
+import ru.plumsoftware.net.core.model.receive.UserReceive
+import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
 import service.hash.HashService

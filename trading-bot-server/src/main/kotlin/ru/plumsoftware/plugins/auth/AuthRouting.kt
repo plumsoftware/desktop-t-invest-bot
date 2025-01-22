@@ -10,8 +10,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import ru.plumsoftware.facade.AuthFacade
-import ru.plumsoftware.model.receive.UserReceive
-import ru.plumsoftware.model.response.UserResponseEither
+import ru.plumsoftware.net.core.model.receive.UserReceive
+import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
 import service.hash.HashService

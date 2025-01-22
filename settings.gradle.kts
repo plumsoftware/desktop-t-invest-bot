@@ -27,3 +27,4 @@ dependencyResolutionManagement {
 include(":desktop-compose-app")
 include(":android-app")
 include(":trading-bot-server")
+include(":net-core")

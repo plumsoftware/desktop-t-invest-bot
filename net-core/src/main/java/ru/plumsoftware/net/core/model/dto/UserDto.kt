@@ -1,4 +1,4 @@
-package ru.plumsoftware.model.dto
+package ru.plumsoftware.net.core.model.dto
 
 import kotlinx.serialization.Serializable
 
