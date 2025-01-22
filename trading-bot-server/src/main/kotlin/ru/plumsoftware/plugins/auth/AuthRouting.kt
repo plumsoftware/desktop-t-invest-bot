@@ -7,10 +7,11 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
-import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import ru.plumsoftware.facade.AuthFacade
 import ru.plumsoftware.model.receive.UserReceive
+import ru.plumsoftware.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
 import service.hash.HashService
@@ -29,13 +30,16 @@ fun Application.configureAuthRouting() {
 
     routing {
         authenticate(AuthConfig.BEARER_AUTH) {
-            post(path = "user") {
+            put(path = "user") {
                 val userReceive = call.receive<UserReceive>()
                 try {
-                    authFacade.authNewUser(userReceive = userReceive)
-                    call.respond(HttpStatusCode.OK)
+                    val userResponse = authFacade.authNewUser(userReceive = userReceive)
+                    call.respond(HttpStatusCode.OK, userResponse)
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        UserResponseEither.Error(msg = e.message ?: "")
+                    )
                 }
             }
             get(path = "user/{phone}") {

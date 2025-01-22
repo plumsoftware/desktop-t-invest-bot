@@ -2,6 +2,7 @@ package ru.plumsoftware.facade
 
 import ru.plumsoftware.model.dto.UserDto
 import ru.plumsoftware.model.receive.UserReceive
+import ru.plumsoftware.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
 import service.hash.HashService
@@ -13,7 +14,7 @@ class AuthFacade(
     private val cryptographyService: CryptographyService
 ) {
 
-    suspend fun authNewUser(userReceive: UserReceive): Long {
+    suspend fun authNewUser(userReceive: UserReceive): UserResponseEither {
 
         val allPhones = authService.getAllPhones()
         val phone = userReceive.phone
@@ -44,12 +45,15 @@ class AuthFacade(
             secretKey = cryptographyService.keyToString(secretKey)
         )
         authService.createNewUser(userDto = userDto)
-        return id
+        return UserResponseEither.UserResponse(
+            id = id
+        )
     }
 
     suspend fun getUser(phone: String): UserReceive? {
 
         var id: Long? = null
+        var exitLoop: Boolean = false
 
         val allPhones = authService.getAllPhones()
 
@@ -63,10 +67,15 @@ class AuthFacade(
                     val decryptedPhone = cryptographyService.decrypt(encryptedPhone, secretKey)
                     if (decryptedPhone == phone) {
                         id = it.key
+                        exitLoop = true
                         break
-                    } else throw Exception("User is not registered")
+                    }
                 }
             }
+        }
+
+        if (!exitLoop) {
+            throw Exception("User is not registered")
         }
 
         return if (id != null) {
