@@ -38,4 +38,10 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.postgresql)
 
+    //Hash
+    implementation(libs.spring.security.crypto)
+    implementation(libs.bcprov.jdk15on)
+
+    //Logging
+    implementation(libs.commons.logging)
 }

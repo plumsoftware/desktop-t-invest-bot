@@ -8,17 +8,29 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import ru.plumsoftware.model.UserDto
+import ru.plumsoftware.facade.AuthFacade
+import ru.plumsoftware.model.receive.UserReceive
 import ru.plumsoftware.service.auth.AuthService
+import service.cryptography.CryptographyService
+import service.hash.HashService
 
 fun Application.configureAuthRouting() {
+    val applicationConfig = environment.config
     val authService = AuthService()
+    val hashService = HashService(applicationConfig)
+    val cryptographyService =
+        CryptographyService(applicationConfig)
+    val authFacade = AuthFacade(
+        authService = authService,
+        hashService = hashService,
+        cryptographyService = cryptographyService
+    )
 
     routing {
         post(path = "user") {
-            val userDto = call.receive<UserDto>()
+            val userReceive = call.receive<UserReceive>()
             try {
-                authService.createNewUser(userDto = userDto)
+                authFacade.authNewUser(userReceive = userReceive)
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "")
@@ -27,7 +39,7 @@ fun Application.configureAuthRouting() {
         get(path = "user/{phone}") {
             val phone = call.parameters["phone"] ?: throw IllegalArgumentException("Invalid phone")
             try {
-                val userDto = authService.getUserByPhone(phone = phone)
+                val userDto = authFacade.getUser(phone = phone)
                 if (userDto != null)
                     call.respond(HttpStatusCode.OK, userDto)
                 else
