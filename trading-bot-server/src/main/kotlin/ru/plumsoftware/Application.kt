@@ -3,6 +3,7 @@ package ru.plumsoftware
 import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import ru.plumsoftware.plugins.auth.configBearerAuth
 import ru.plumsoftware.plugins.auth.configureAuthRouting
 import ru.plumsoftware.plugins.database.configureDatabase
 import ru.plumsoftware.plugins.defroute.configureDefaultRouting
@@ -21,5 +22,7 @@ fun Application.module() {
     configureDatabase()
     configureDefaultRouting()
     configureSerialization()
+    configBearerAuth()
+
     configureAuthRouting()
 }

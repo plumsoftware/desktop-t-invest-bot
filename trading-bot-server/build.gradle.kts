@@ -44,4 +44,7 @@ dependencies {
 
     //Logging
     implementation(libs.commons.logging)
+
+    //Auth
+    implementation(libs.ktor.server.auth)
 }
