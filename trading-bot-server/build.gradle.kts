@@ -25,8 +25,17 @@ dependencies {
     //Serialization
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.serialization.kotlinx.cbor)
+    implementation(libs.ktor.serialization.kotlinx.xml)
 
     //Json
     implementation(libs.serialization.json)
     implementation(libs.serialization.json.jvm)
+
+    //Database
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.postgresql)
+
 }
