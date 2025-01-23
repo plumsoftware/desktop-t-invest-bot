@@ -15,4 +15,7 @@ dependencies {
 
     //Invest api
     implementation(libs.java.sdk.core)
+
+    //Modules
+    implementation(project(path = ":net-core"))
 }

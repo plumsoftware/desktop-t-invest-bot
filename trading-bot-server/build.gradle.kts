@@ -1,5 +1,5 @@
 plugins {
-    id("io.ktor.plugin").version("2.3.11")
+    id("io.ktor.plugin").version("2.3.12")
     application
     kotlin("jvm")
     kotlin("plugin.serialization").version(libs.versions.kotlin)
@@ -50,4 +50,5 @@ dependencies {
 
     //Modules
     implementation(project(path = ":net-core"))
+    implementation(project(path = ":trading-core:t-trading"))
 }
