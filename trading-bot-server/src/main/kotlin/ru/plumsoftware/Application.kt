@@ -8,6 +8,7 @@ import ru.plumsoftware.plugins.auth.configureAuthRouting
 import ru.plumsoftware.plugins.database.configureDatabase
 import ru.plumsoftware.plugins.defroute.configureDefaultRouting
 import ru.plumsoftware.plugins.serialization.configureSerialization
+import ru.plumsoftware.plugins.trading.configureTradingRouting
 
 fun main(args: Array<String>) {
     embeddedServer(
@@ -25,4 +26,5 @@ fun Application.module() {
     configBearerAuth()
 
     configureAuthRouting()
+    configureTradingRouting()
 }
