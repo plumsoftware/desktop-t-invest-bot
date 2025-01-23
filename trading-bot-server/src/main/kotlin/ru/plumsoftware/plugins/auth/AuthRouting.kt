@@ -55,6 +55,20 @@ fun Application.configureAuthRouting() {
                     call.respond(HttpStatusCode.NotFound, e.message ?: "")
                 }
             }
+            get(path = "t/tokens/{id}") {
+                val id =
+                    call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
+                try {
+                    id as Long
+                    val tTokensReceive = authFacade.getTTokens(id = id)
+                    if (tTokensReceive != null)
+                        call.respond(HttpStatusCode.OK, tTokensReceive)
+                    else
+                        call.respond(HttpStatusCode.BadRequest)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+                }
+            }
         }
     }
 }

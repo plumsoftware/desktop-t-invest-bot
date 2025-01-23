@@ -1,5 +1,6 @@
 package ru.plumsoftware.service.auth
 
+import ru.plumsoftware.net.core.model.dto.TTokensDto
 import ru.plumsoftware.net.core.model.dto.UserDto
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.service.auth.database.NamesTable
@@ -7,6 +8,7 @@ import ru.plumsoftware.service.auth.database.PasswordsTable
 import ru.plumsoftware.service.auth.database.PhonesTable
 import ru.plumsoftware.service.auth.database.SecretKeysTable
 import ru.plumsoftware.service.auth.database.TTokensTable
+import ru.plumsoftware.service.auth.database.dbQueryReturn
 
 class AuthService {
 
@@ -22,6 +24,12 @@ class AuthService {
     suspend fun insertTTokens(tTokensReceive: TTokensReceive) {
         with(tTokensReceive) {
             TTokensTable.insert(marketToken = marketToken, sandboxToken = sandboxToken, id = id)
+        }
+    }
+
+    suspend fun getTTokens(id: Long) : TTokensDto?{
+        return dbQueryReturn {
+            TTokensTable.selectById(id = id)
         }
     }
 

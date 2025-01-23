@@ -1,6 +1,7 @@
 package ru.plumsoftware.facade
 
 import ru.plumsoftware.net.core.model.dto.UserDto
+import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
@@ -27,7 +28,7 @@ class AuthFacade(
 
                 if (encryptedPhone != null) {
                     val decryptedPhone = cryptographyService.decrypt(encryptedPhone, secretKey)
-                    if (decryptedPhone == phone) throw Exception("Phone is not unique")
+                    if (decryptedPhone == phone) return UserResponseEither.Error("Phone is not unique")
                 }
             }
         }
@@ -48,6 +49,21 @@ class AuthFacade(
         return UserResponseEither.UserResponse(
             id = id
         )
+    }
+
+    suspend fun insertTTokens(tTokensReceive: TTokensReceive) {
+        authService.insertTTokens(tTokensReceive = tTokensReceive)
+    }
+
+    suspend fun getTTokens(id: Long): TTokensReceive? {
+        val tTokensDto = authService.getTTokens(id = id)
+        return if (tTokensDto != null) {
+            TTokensReceive(
+                id = id,
+                marketToken = tTokensDto.marketToken,
+                sandboxToken = tTokensDto.sandboxToken
+            )
+        } else null
     }
 
     suspend fun getUser(phone: String): UserReceive? {
