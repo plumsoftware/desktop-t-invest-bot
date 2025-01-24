@@ -7,9 +7,13 @@ import ru.tinkoff.piapi.core.InvestApi
 import ru.tinkoff.piapi.core.models.Portfolio
 import ru.tinkoff.piapi.core.models.Positions
 
-class SandboxRepositoryImpl(token: String) : SandboxRepository {
+class SandboxRepositoryImpl : SandboxRepository {
 
-    private val investApi: InvestApi = InvestApi.createSandbox(token)
+    private lateinit var investApi: InvestApi
+
+    override fun init(sandboxToken: String) {
+        investApi = InvestApi.createSandbox(sandboxToken)
+    }
 
     override suspend fun getPortfolio(accountId: String): Portfolio {
         val portfolio = investApi.operationsService.getPortfolioSync(accountId)
@@ -48,5 +52,9 @@ class SandboxRepositoryImpl(token: String) : SandboxRepository {
 
     override suspend fun getInstrumentsBy(id: String): List<InstrumentShort> {
         return investApi.instrumentsService.findInstrumentSync(id)
+    }
+
+    override fun closeApi() {
+        investApi.destroy(3)
     }
 }

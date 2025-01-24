@@ -1,11 +1,11 @@
-package ru.plumsoftware.net.core.model.mode
+package ru.plumsoftware.model
 
-enum class StartsWithMode {
-    BUY,
-    SELL;
+enum class TradingMode {
+    MARKET,
+    SANDBOX;
 
     companion object {
-        fun fromString(value: String): StartsWithMode? {
+        fun fromString(value: String): TradingMode? {
             return try {
                 valueOf(value.uppercase())
             } catch (e: IllegalArgumentException) {

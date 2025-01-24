@@ -7,9 +7,11 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import ru.plumsoftware.facade.AuthFacade
+import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
@@ -42,6 +44,19 @@ fun Application.configureAuthRouting() {
                     )
                 }
             }
+            post(path = "user/t/tokens") {
+                val tTokensReceive = call.receive<TTokensReceive>()
+
+                try {
+                    authFacade.insertTTokens(tTokensReceive = tTokensReceive)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        UserResponseEither.Error(msg = e.message ?: "")
+                    )
+                }
+            }
             get(path = "user/{phone}") {
                 val phone =
                     call.parameters["phone"] ?: throw IllegalArgumentException("Invalid phone")
@@ -59,8 +74,7 @@ fun Application.configureAuthRouting() {
                 val id =
                     call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
                 try {
-                    id as Long
-                    val tTokensReceive = authFacade.getTTokens(id = id)
+                    val tTokensReceive = authFacade.getTTokens(id = id.toLong())
                     if (tTokensReceive != null)
                         call.respond(HttpStatusCode.OK, tTokensReceive)
                     else

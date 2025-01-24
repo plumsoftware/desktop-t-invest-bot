@@ -1,8 +1,10 @@
 package ru.plumsoftware.facade
 
+import ru.plumsoftware.mappers.trading.toDto
 import ru.plumsoftware.net.core.model.dto.UserDto
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
+import ru.plumsoftware.net.core.model.receive.trading.TradingModelsReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
@@ -53,6 +55,14 @@ class AuthFacade(
 
     suspend fun insertTTokens(tTokensReceive: TTokensReceive) {
         authService.insertTTokens(tTokensReceive = tTokensReceive)
+    }
+
+    suspend fun insertTradingModels(tradingModelsReceive: TradingModelsReceive) {
+        authService.insertTradingModel(tradingModelsDto = tradingModelsReceive.toDto())
+    }
+
+    suspend fun insertSandboxTradingModels(tradingModelsReceive: TradingModelsReceive) {
+        authService.insertSandboxTradingModel(tradingModelsDto = tradingModelsReceive.toDto())
     }
 
     suspend fun getTTokens(id: Long): TTokensReceive? {

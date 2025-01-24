@@ -7,6 +7,7 @@ import ru.tinkoff.piapi.core.models.Positions
 
 interface SandboxRepository {
 
+    fun init(sandboxToken: String)
     suspend fun getPortfolio(accountId: String): Portfolio
     suspend fun getPositions(accountId: String): Positions
     suspend fun createNewSandbox(name: String) : List<Account>
@@ -14,5 +15,6 @@ interface SandboxRepository {
     suspend fun getAccounts() : List<Account>
     suspend fun addMoney(value: Int, currency: String, accountId: String)
     suspend fun getInstrumentsBy(id: String) : List<InstrumentShort>
+    fun closeApi()
 
 }
