@@ -1,6 +1,7 @@
 package ru.plumsoftware.facade
 
 import ru.plumsoftware.mappers.trading.toDto
+import ru.plumsoftware.mappers.trading.toReceive
 import ru.plumsoftware.net.core.model.dto.UserDto
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
@@ -122,6 +123,14 @@ class AuthFacade(
                 phone = phoneFromRemote
             )
         } else null
+    }
+
+    suspend fun getTradingModels(id: Long) : TradingModelsReceive {
+        return authService.getTTradingModels(id = id).toReceive()
+    }
+
+    suspend fun getSandboxTradingModels(id: Long) : TradingModelsReceive {
+        return authService.getSandboxTTradingModels(id = id).toReceive()
     }
 
     suspend fun getAll(): List<UserDto> {

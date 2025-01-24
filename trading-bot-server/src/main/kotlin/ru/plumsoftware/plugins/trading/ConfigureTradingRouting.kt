@@ -8,7 +8,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import ru.plumsoftware.facade.AuthFacade
 import ru.plumsoftware.facade.TTradingFacade
@@ -71,8 +70,10 @@ fun Application.configureTradingRouting() {
                     val tTokensReceive = authFacade.getTTokens(id = id.toLong())
                     if (tTokensReceive == null)
                         call.respond(HttpStatusCode.BadRequest)
-                    else
+                    else {
                         tTradingFacade.init(tTokensReceive = tTokensReceive)
+                        call.respond(HttpStatusCode.OK)
+                    }
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
                 }
@@ -87,8 +88,32 @@ fun Application.configureTradingRouting() {
                 }
             }
 
-            put(path = "trading/t/run") {
+            post(path = "trading/t/run") {
+                val modeParam = call.request.queryParameters["mode"]
+                    ?: throw IllegalArgumentException("Invalid mode")
+                val idParam = call.request.queryParameters["id"]
+                    ?: throw IllegalArgumentException("Invalid id")
+                val mode = TradingMode.fromString(modeParam)
 
+                if (mode != null) {
+                    when (mode) {
+                        TradingMode.MARKET -> {
+                            val tradingModels: TradingModelsReceive =
+                                authFacade.getTradingModels(id = idParam.toLong())
+                            tTradingFacade.runMarketLimitOrderTrading(tradingModelsReceive = tradingModels)
+                            call.respond(HttpStatusCode.OK)
+                        }
+
+                        TradingMode.SANDBOX -> {
+                            val tradingModels: TradingModelsReceive =
+                                authFacade.getSandboxTradingModels(id = idParam.toLong())
+                            //TODO() Run Sandbox Trading
+                            call.respond(HttpStatusCode.OK)
+                        }
+                    }
+                } else {
+                    call.respond(HttpStatusCode.BadRequest)
+                }
             }
         }
     }

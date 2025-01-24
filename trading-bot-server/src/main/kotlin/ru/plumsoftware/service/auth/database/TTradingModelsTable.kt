@@ -8,21 +8,21 @@ import ru.plumsoftware.net.core.model.dto.trading.TradingModelsDto
 import ru.plumsoftware.net.core.model.mode.StartsWithMode
 import ru.plumsoftware.net.core.model.mode.TradingMode
 
-object TradingModelsTable : Table("t_trading_models") {
-    private val tradingModelId = TradingModelsTable.long("trading_model_id")
-    private val id = TradingModelsTable.long("id")
-    private val figi = TradingModelsTable.text("figi")
-    private val lots = TradingModelsTable.integer("lots")
-    private val tick = TradingModelsTable.long("tick")
-    private val startsWith = TradingModelsTable.text("starts_with")
-    private val tradingMode = TradingModelsTable.text("trading_mode")
-    private val percentIncrease = TradingModelsTable.float("percent_increase")
-    private val percentDecrease = TradingModelsTable.float("percent_decrease")
+object TTradingModelsTable : Table("t_trading_models") {
+    private val tradingModelId = TTradingModelsTable.long("trading_model_id")
+    private val id = TTradingModelsTable.long("id")
+    private val figi = TTradingModelsTable.text("figi")
+    private val lots = TTradingModelsTable.integer("lots")
+    private val tick = TTradingModelsTable.long("tick")
+    private val startsWith = TTradingModelsTable.text("starts_with")
+    private val tradingMode = TTradingModelsTable.text("trading_mode")
+    private val percentIncrease = TTradingModelsTable.float("percent_increase")
+    private val percentDecrease = TTradingModelsTable.float("percent_decrease")
 
     suspend fun insert(tradingModelsDto: TradingModelsDto) {
         tradingModelsDto.tradingModelsDto.forEach { tradingModelDto ->
             dbQuery {
-                TradingModelsTable.insert {
+                TTradingModelsTable.insert {
                     it[this.tradingModelId] = tradingModelDto.tradingModelId
                     it[this.id] = tradingModelsDto.id
                     it[this.figi] = tradingModelDto.figi
@@ -39,10 +39,9 @@ object TradingModelsTable : Table("t_trading_models") {
 
     suspend fun get(id: Long): TradingModelsDto {
         return dbQueryReturn {
-            val tradingModel = TradingModelsTable
-                .slice(TradingModelsTable.id)
+            val tradingModel = TTradingModelsTable
                 .selectAll()
-                .groupBy(TradingModelsTable.id)
+                .where { TTradingModelsTable.id.eq(id) }
                 .map {
                     TradingModelDto(
                         tradingModelId = it[this.tradingModelId],

@@ -4,6 +4,7 @@ import ru.plumsoftware.net.core.model.dto.TTokensDto
 import ru.plumsoftware.net.core.model.dto.trading.TradingModelDto
 import ru.plumsoftware.net.core.model.dto.trading.TradingModelsDto
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
+import ru.plumsoftware.net.core.model.receive.trading.TradingModelReceive
 import ru.plumsoftware.net.core.model.receive.trading.TradingModelsReceive
 import ru.plumsoftware.net.core.model.response.trading.market.InstrumentResponse
 import ru.plumsoftware.net.core.model.response.trading.market.MoneyResponse
@@ -71,5 +72,22 @@ fun TTokensReceive.toDto(): TTokensDto {
     return TTokensDto(
         sandboxToken = this.sandboxToken,
         marketToken = this.marketToken
+    )
+}
+
+fun TradingModelsDto.toReceive() : TradingModelsReceive {
+    return TradingModelsReceive(
+        id = this.id,
+        tradingModelsReceive = this.tradingModelsDto.map {
+            TradingModelReceive(
+                figi = it.figi,
+                lots = it.lots,
+                tick = it.tick,
+                startsWith = it.startsWith,
+                tradingMode = it.tradingMode,
+                percentIncrease = it.percentIncrease,
+                percentDecrease = it.percentDecrease
+            )
+        }
     )
 }

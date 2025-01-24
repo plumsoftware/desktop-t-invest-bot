@@ -40,9 +40,8 @@ object TTradingModelsSandboxTable : Table("t_trading_models_sandbox") {
     suspend fun get(id: Long): TradingModelsDto {
         return dbQueryReturn {
             val tradingModel = TTradingModelsSandboxTable
-                .slice(TTradingModelsSandboxTable.id)
                 .selectAll()
-                .groupBy(TTradingModelsSandboxTable.id)
+                .where { TTradingModelsSandboxTable.id.eq(id) }
                 .map {
                     TradingModelDto(
                         tradingModelId = it[this.tradingModelId],

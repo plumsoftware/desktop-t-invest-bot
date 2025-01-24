@@ -50,6 +50,7 @@ class MarketRepositoryImpl : MarketRepository {
         tradingModels.forEach { tradingModelDto: TradingModelDto ->
             val job = tradingScope.launch {
                 //Trading
+                println("--->RUN TRADING<---")
             }
             jobs.add(job)
         }

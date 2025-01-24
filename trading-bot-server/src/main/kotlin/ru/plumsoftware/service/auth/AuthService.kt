@@ -10,7 +10,7 @@ import ru.plumsoftware.service.auth.database.PhonesTable
 import ru.plumsoftware.service.auth.database.SecretKeysTable
 import ru.plumsoftware.service.auth.database.TTokensTable
 import ru.plumsoftware.service.auth.database.TTradingModelsSandboxTable
-import ru.plumsoftware.service.auth.database.TradingModelsTable
+import ru.plumsoftware.service.auth.database.TTradingModelsTable
 import ru.plumsoftware.service.auth.database.dbQueryReturn
 
 class AuthService {
@@ -31,7 +31,7 @@ class AuthService {
     }
 
     suspend fun insertTradingModel(tradingModelsDto: TradingModelsDto) {
-        TradingModelsTable.insert(tradingModelsDto = tradingModelsDto)
+        TTradingModelsTable.insert(tradingModelsDto = tradingModelsDto)
     }
 
     suspend fun insertSandboxTradingModel(tradingModelsDto: TradingModelsDto) {
@@ -55,4 +55,8 @@ class AuthService {
     suspend fun getPassword(id: Long): String? = PasswordsTable.selectById(id = id)
 
     suspend fun getName(id: Long): String? = NamesTable.selectById(id = id)
+
+    suspend fun getTTradingModels(id: Long) = TTradingModelsTable.get(id = id)
+
+    suspend fun getSandboxTTradingModels(id: Long) = TTradingModelsSandboxTable.get(id = id)
 }
