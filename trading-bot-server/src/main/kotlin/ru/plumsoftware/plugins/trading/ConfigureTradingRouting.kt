@@ -87,33 +87,78 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest)
                 }
             }
-
             post(path = "trading/t/run") {
-                val modeParam = call.request.queryParameters["mode"]
-                    ?: throw IllegalArgumentException("Invalid mode")
-                val idParam = call.request.queryParameters["id"]
-                    ?: throw IllegalArgumentException("Invalid id")
-                val mode = TradingMode.fromString(modeParam)
+                try {
+                    val modeParam = call.request.queryParameters["mode"]
+                        ?: throw IllegalArgumentException("Invalid mode")
+                    val idParam = call.request.queryParameters["id"]
+                        ?: throw IllegalArgumentException("Invalid id")
+                    val mode = TradingMode.fromString(modeParam)
 
-                if (mode != null) {
-                    when (mode) {
-                        TradingMode.MARKET -> {
-                            val tradingModels: TradingModelsReceive =
-                                authFacade.getTradingModels(id = idParam.toLong())
-                            tTradingFacade.runMarketLimitOrderTrading(tradingModelsReceive = tradingModels)
-                            call.respond(HttpStatusCode.OK)
-                        }
+                    if (mode != null) {
+                        when (mode) {
+                            TradingMode.MARKET -> {
+                                val tradingModelsReceive: TradingModelsReceive =
+                                    authFacade.getTradingModels(id = idParam.toLong())
+                                tTradingFacade.runMarketLimitOrderTrading(tradingModelsReceive = tradingModelsReceive)
+                                call.respond(HttpStatusCode.OK)
+                            }
 
-                        TradingMode.SANDBOX -> {
-                            val tradingModels: TradingModelsReceive =
-                                authFacade.getSandboxTradingModels(id = idParam.toLong())
-                            //TODO() Run Sandbox Trading
-                            call.respond(HttpStatusCode.OK)
+                            TradingMode.SANDBOX -> {
+                                val tradingModelsReceive: TradingModelsReceive =
+                                    authFacade.getSandboxTradingModels(id = idParam.toLong())
+                                tTradingFacade.runSandboxTrading(tradingModelsReceive = tradingModelsReceive)
+                                call.respond(HttpStatusCode.OK)
+                            }
                         }
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
                     }
-                } else {
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+                }
+            }
+            get(path = "trading/t/status") {
+                try {
+                    val id = call.request.queryParameters["id"]
+                        ?: throw IllegalArgumentException("Invalid id")
+                    val mode = TradingMode.fromString(
+                        call.request.queryParameters["mode"]
+                            ?: throw IllegalArgumentException("Invalid mode")
+                    )
+
+                    if (mode != null) {
+                        val status = tTradingFacade.getTradingStatus(id = id.toLong(), mode = mode)
+                        call.respond(HttpStatusCode.OK, status)
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+                } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
                 }
+            }
+            post(path = "trading/t/stop") {
+                try {
+                    val id = call.request.queryParameters["id"]
+                        ?: throw IllegalArgumentException("Invalid id")
+                    val mode = TradingMode.fromString(
+                        call.request.queryParameters["mode"]
+                            ?: throw IllegalArgumentException("Invalid mode")
+                    )
+
+                    if (mode != null) {
+                        tTradingFacade.stopTrading(id = id.toLong(), mode = mode)
+                        call.respond(HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                }
+            }
+            post(path = "destrop/t/api") {
+                tTradingFacade.destroy()
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

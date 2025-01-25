@@ -3,11 +3,9 @@ package ru.plumsoftware.repository.market
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import ru.plumsoftware.net.core.model.dto.trading.TradingModelDto
+import ru.plumsoftware.extensions.runTrading
 import ru.plumsoftware.net.core.model.dto.trading.TradingModelsDto
 import ru.tinkoff.piapi.contract.v1.Account
 import ru.tinkoff.piapi.contract.v1.Instrument
@@ -23,6 +21,7 @@ class MarketRepositoryImpl : MarketRepository {
     private val tradingContext =
         Dispatchers.IO + SupervisorJob() + CoroutineName("Trading coroutine")
     private val tradingScope = CoroutineScope(tradingContext)
+    private val map = mutableMapOf<Long, TradingModelsDto>()
 
 
     override fun init(token: String) {
@@ -42,22 +41,22 @@ class MarketRepositoryImpl : MarketRepository {
         return investApi.instrumentsService.findInstrumentSync(id)
     }
 
-    override fun runLimitOrderTrading(tradingModelsDto: TradingModelsDto) {
-        val id = tradingModelsDto.id
-        val tradingModels = tradingModelsDto.tradingModelsDto
-        val jobs = mutableListOf<Job>()
-
-        tradingModels.forEach { tradingModelDto: TradingModelDto ->
-            val job = tradingScope.launch {
-                //Trading
-                println("--->RUN TRADING<---")
-            }
-            jobs.add(job)
-        }
+    override suspend fun runLimitOrderTrading(tradingModelsDto: TradingModelsDto) {
+        if (!map.containsKey(tradingModelsDto.id)) {
+            runTrading(tradingModelsDto = tradingModelsDto, tradingScope = tradingScope)
+            map[tradingModelsDto.id] = tradingModelsDto
+        } else throw Exception("Trading is already running.")
     }
 
-    override fun stopLimitOrderTrading() {
-        tradingScope.cancel()
+    override fun getTradingStatus(id: Long): Boolean {
+        return map.containsKey(id)
+    }
+
+    override fun stopLimitOrderTrading(id: Long) {
+        if (map.containsKey(id)) {
+            tradingScope.cancel()
+            map.remove(id)
+        } else throw Exception("Trading is not running.")
     }
 
     override fun closeApi() {

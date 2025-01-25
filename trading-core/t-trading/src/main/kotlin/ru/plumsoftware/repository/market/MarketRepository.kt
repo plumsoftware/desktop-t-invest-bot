@@ -11,8 +11,9 @@ interface MarketRepository {
     suspend fun getPortfolio(): Portfolio
     suspend fun getInstrumentByFigi(figi: String): Instrument
     suspend fun getInstrumentsBy(id: String): List<InstrumentShort>
-    fun runLimitOrderTrading(tradingModelsDto: TradingModelsDto)
-    fun stopLimitOrderTrading()
+    suspend fun runLimitOrderTrading(tradingModelsDto: TradingModelsDto)
+    fun getTradingStatus(id: Long): Boolean
+    fun stopLimitOrderTrading(id: Long)
     fun closeApi()
 
 }
