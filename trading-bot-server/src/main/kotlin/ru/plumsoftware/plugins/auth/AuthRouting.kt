@@ -11,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import ru.plumsoftware.facade.AuthFacade
+import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
@@ -81,6 +82,17 @@ fun Application.configureAuthRouting() {
                         call.respond(HttpStatusCode.BadRequest)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+                }
+            }
+            get(path = "t/password/match") {
+                val passwordMatchReceive = call.receive<PasswordMatchReceive>()
+
+                val matches = authFacade.match(passwordMatchReceive = passwordMatchReceive)
+
+                if (matches) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.BadRequest)
                 }
             }
         }

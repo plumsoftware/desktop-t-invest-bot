@@ -1,13 +1,19 @@
 package ru.plumsoftware.facade
 
-import ru.plumsoftware.mappers.trading.toDto
+import ru.plumsoftware.mappers.trading.toDto1
+import ru.plumsoftware.mappers.trading.toDto2
 import ru.plumsoftware.mappers.trading.toReceive
+import ru.plumsoftware.mappers.trading.toReceive2
 import ru.plumsoftware.net.core.model.dto.UserDto
+import ru.plumsoftware.net.core.model.dto.trading.TradingModelsDto
+import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.receive.trading.TradingModelsReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
 import ru.plumsoftware.service.auth.AuthService
+import ru.plumsoftware.service.auth.database.PasswordsTable
+import ru.plumsoftware.service.auth.database.SecretKeysTable
 import service.cryptography.CryptographyService
 import service.hash.HashService
 import java.util.UUID
@@ -55,32 +61,66 @@ class AuthFacade(
     }
 
     suspend fun insertTTokens(tTokensReceive: TTokensReceive) {
-        authService.insertTTokens(tTokensReceive = tTokensReceive)
+
+        val key = SecretKeysTable.selectById(id = tTokensReceive.id)
+
+        if (key != null) {
+            val secretKey = cryptographyService.stringToKey(key)
+
+            val marketTokenEncrypted =
+                cryptographyService.encrypt(tTokensReceive.marketToken, secretKey)
+            val sandboxTokenEncrypted =
+                cryptographyService.encrypt(tTokensReceive.sandboxToken, secretKey)
+
+            authService.insertTTokens(
+                tTokensReceive = tTokensReceive.copy(
+                    marketToken = marketTokenEncrypted,
+                    sandboxToken = sandboxTokenEncrypted
+                )
+            )
+        } else throw Exception("Invalid id")
     }
 
     suspend fun insertTradingModels(tradingModelsReceive: TradingModelsReceive) {
-        authService.insertTradingModel(tradingModelsDto = tradingModelsReceive.toDto())
+        authService.insertTradingModel(tradingModelsDto = encryptTradingModels(tradingModelsReceive = tradingModelsReceive))
     }
 
     suspend fun insertSandboxTradingModels(tradingModelsReceive: TradingModelsReceive) {
-        authService.insertSandboxTradingModel(tradingModelsDto = tradingModelsReceive.toDto())
+        authService.insertSandboxTradingModel(
+            tradingModelsDto = encryptTradingModels(
+                tradingModelsReceive = tradingModelsReceive
+            )
+        )
     }
 
     suspend fun getTTokens(id: Long): TTokensReceive? {
-        val tTokensDto = authService.getTTokens(id = id)
-        return if (tTokensDto != null) {
-            TTokensReceive(
-                id = id,
-                marketToken = tTokensDto.marketToken,
-                sandboxToken = tTokensDto.sandboxToken
-            )
-        } else null
+
+        val key = SecretKeysTable.selectById(id = id)
+        if (key != null) {
+
+            val secretKey = cryptographyService.stringToKey(key)
+
+            val tTokensDto = authService.getTTokens(id = id)
+
+            return if (tTokensDto != null) {
+                val marketTokenDecrypted =
+                    cryptographyService.decrypt(tTokensDto.marketToken, secretKey)
+                val sandboxTokenDecrypted =
+                    cryptographyService.decrypt(tTokensDto.sandboxToken, secretKey)
+
+                TTokensReceive(
+                    id = id,
+                    marketToken = marketTokenDecrypted,
+                    sandboxToken = sandboxTokenDecrypted
+                )
+            } else null
+        } else throw Exception("Invalid id")
     }
 
     suspend fun getUser(phone: String): UserReceive? {
 
         var id: Long? = null
-        var exitLoop: Boolean = false
+        var exitLoop = false
 
         val allPhones = authService.getAllPhones()
 
@@ -112,7 +152,8 @@ class AuthFacade(
             val name = cryptographyService.decrypt(
                 authService.getName(id = id) ?: throw Exception("Invalid name"), secretKey
             )
-            val password = authService.getPassword(id = id) ?: throw Exception("Invalid password")
+            val password =
+                authService.getPassword(id = id) ?: throw Exception("Invalid password")
             val phoneFromRemote = cryptographyService.decrypt(
                 authService.getPhone(id = id) ?: throw Exception("Invalid phone"), secretKey
             )
@@ -125,12 +166,12 @@ class AuthFacade(
         } else null
     }
 
-    suspend fun getTradingModels(id: Long) : TradingModelsReceive {
-        return authService.getTTradingModels(id = id).toReceive()
+    suspend fun getTradingModels(id: Long): TradingModelsReceive {
+        return decryptTradingModels(tradingModelsDto = authService.getTTradingModels(id = id))
     }
 
-    suspend fun getSandboxTradingModels(id: Long) : TradingModelsReceive {
-        return authService.getSandboxTTradingModels(id = id).toReceive()
+    suspend fun getSandboxTradingModels(id: Long): TradingModelsReceive {
+        return authService.getSandboxTTradingModels(id = id).toReceive2()
     }
 
     suspend fun getAll(): List<UserDto> {
@@ -148,5 +189,67 @@ class AuthFacade(
             )
         }
         return list
+    }
+
+    suspend fun match(passwordMatchReceive: PasswordMatchReceive): Boolean {
+        val passwordFromDb = PasswordsTable.selectById(id = passwordMatchReceive.id)
+        if (passwordFromDb != null) {
+            val matches: Boolean = hashService.matches(passwordMatchReceive.password, passwordFromDb)
+            return matches
+        } else throw Exception("Invalid id")
+    }
+
+    private suspend fun encryptTradingModels(tradingModelsReceive: TradingModelsReceive): TradingModelsDto {
+        val id = tradingModelsReceive.id
+        val key = SecretKeysTable.selectById(id = id)
+
+        if (key != null) {
+
+            val secretKey = cryptographyService.stringToKey(key)
+
+
+            val tradingModelsDto = tradingModelsReceive
+                .toDto1()
+                .copy(
+                    tradingModelsDto = tradingModelsReceive.tradingModelsReceive.map {
+                        val encryptedFigi = cryptographyService.encrypt(it.figi, secretKey)
+                        it
+                            .toDto2()
+                            .copy(
+                                figi = encryptedFigi
+                            )
+                    }
+                )
+
+
+            return tradingModelsDto
+        } else throw Exception("Invalid id")
+    }
+
+    private suspend fun decryptTradingModels(tradingModelsDto: TradingModelsDto): TradingModelsReceive {
+        val id = tradingModelsDto.id
+        val key = SecretKeysTable.selectById(id = id)
+
+        if (key != null) {
+
+            val secretKey = cryptographyService.stringToKey(key)
+
+
+            val tradingModelsReceive = tradingModelsDto
+                .toReceive2()
+                .copy(
+                    tradingModelsReceive = tradingModelsDto.tradingModelsDto.map {
+                        val decryptedFigi = cryptographyService.decrypt(it.figi, secretKey)
+                        it
+                            .toReceive()
+                            .copy(
+                                figi = decryptedFigi
+                            )
+                    }
+                )
+
+
+            return tradingModelsReceive
+        } else throw Exception("Invalid id")
     }
 }

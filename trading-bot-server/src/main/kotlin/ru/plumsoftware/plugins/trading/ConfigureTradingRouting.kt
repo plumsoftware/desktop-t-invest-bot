@@ -71,6 +71,19 @@ fun Application.configureTradingRouting() {
                     }
                 }
             }
+            get(path = "trading/models/{id}") {
+                try {
+                    val idParam = call.parameters["id"]
+                        ?: throw IllegalArgumentException("Invalid id")
+                    call.respond(
+                        HttpStatusCode.OK,
+                        authFacade.getTradingModels(id = idParam.toLong())
+                    )
+
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+                }
+            }
             post(path = "trading/t/init/{id}") {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
                 try {

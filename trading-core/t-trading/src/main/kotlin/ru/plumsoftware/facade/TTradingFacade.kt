@@ -2,7 +2,7 @@ package ru.plumsoftware.facade
 
 import ru.plumsoftware.mappers.trading.instrumentToResponse
 import ru.plumsoftware.mappers.trading.portfolioToResponse
-import ru.plumsoftware.mappers.trading.toDto
+import ru.plumsoftware.mappers.trading.toDto1
 import ru.plumsoftware.model.TradingMode
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.trading.TradingModelsReceive
@@ -44,11 +44,11 @@ class TTradingFacade(
     }
 
     suspend fun runMarketLimitOrderTrading(tradingModelsReceive: TradingModelsReceive) {
-        marketRepository.runLimitOrderTrading(tradingModelsDto = tradingModelsReceive.toDto())
+        marketRepository.runLimitOrderTrading(tradingModelsDto = tradingModelsReceive.toDto1())
     }
 
     suspend fun runSandboxTrading(tradingModelsReceive: TradingModelsReceive) {
-        sandboxRepository.runLimitOrderTrading(tradingModelsDto = tradingModelsReceive.toDto())
+        sandboxRepository.runLimitOrderTrading(tradingModelsDto = tradingModelsReceive.toDto1())
     }
 
     fun getTradingStatus(id: Long, mode: TradingMode): TradingStatus {
