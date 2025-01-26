@@ -12,7 +12,11 @@ data class PortfolioResponse(
 data class MoneyResponse(
     val value: String,
     val currency: String
-)
+) {
+    companion object {
+        fun empty() = MoneyResponse(value = "", currency = "")
+    }
+}
 
 @Serializable
 data class PositionResponse(

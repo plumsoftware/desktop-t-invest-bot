@@ -7,6 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import ru.plumsoftware.extensions.runTrading
 import ru.plumsoftware.net.core.model.dto.trading.TradingModelsDto
+import ru.plumsoftware.net.core.model.response.trading.sandbox.SandboxAccountId
 import ru.tinkoff.piapi.contract.v1.Account
 import ru.tinkoff.piapi.contract.v1.InstrumentShort
 import ru.tinkoff.piapi.contract.v1.MoneyValue
@@ -27,8 +28,16 @@ class SandboxRepositoryImpl : SandboxRepository {
         investApi = InvestApi.createSandbox(sandboxToken)
     }
 
-    override suspend fun getPortfolio(accountId: String): Portfolio {
-        val portfolio = investApi.operationsService.getPortfolioSync(accountId)
+    override fun initAccount(name: String): SandboxAccountId {
+        val account = investApi.sandboxService.openAccountSync(name)
+        return SandboxAccountId(
+            name = name,
+            accountId = account
+        )
+    }
+
+    override suspend fun getPortfolio(): Portfolio {
+        val portfolio = investApi.operationsService.getPortfolioSync(investApi.sandboxService.accountsSync[0].id)
         return portfolio
     }
 
@@ -43,8 +52,8 @@ class SandboxRepositoryImpl : SandboxRepository {
         return accounts
     }
 
-    override suspend fun closeAccount(accountId: String) {
-        investApi.sandboxService.closeAccountSync(accountId)
+    override suspend fun closeAccount() {
+        investApi.sandboxService.closeAccountSync(investApi.sandboxService.accountsSync[0].id)
     }
 
     override suspend fun getAccounts(): List<Account> {
