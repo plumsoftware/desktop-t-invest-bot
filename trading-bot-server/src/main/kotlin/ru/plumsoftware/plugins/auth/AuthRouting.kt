@@ -15,6 +15,7 @@ import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
+import ru.plumsoftware.net.core.routing.AuthRouting
 import ru.plumsoftware.service.auth.AuthService
 import service.cryptography.CryptographyService
 import service.hash.HashService
@@ -33,7 +34,7 @@ fun Application.configureAuthRouting() {
 
     routing {
         authenticate(AuthConfig.BEARER_AUTH) {
-            put(path = "user") {
+            put(path = AuthRouting.PUT_USER) {
                 val userReceive = call.receive<UserReceive>()
                 try {
                     val userResponse = authFacade.authNewUser(userReceive = userReceive)
@@ -45,7 +46,7 @@ fun Application.configureAuthRouting() {
                     )
                 }
             }
-            post(path = "user/t/tokens") {
+            post(path = AuthRouting.POST_USER_T_TOKENS) {
                 val tTokensReceive = call.receive<TTokensReceive>()
 
                 try {
@@ -58,7 +59,7 @@ fun Application.configureAuthRouting() {
                     )
                 }
             }
-            get(path = "user/{phone}") {
+            get(path = AuthRouting.GET_USER_BY_PHONE) {
                 val phone =
                     call.parameters["phone"] ?: throw IllegalArgumentException("Invalid phone")
                 try {
@@ -71,7 +72,7 @@ fun Application.configureAuthRouting() {
                     call.respond(HttpStatusCode.NotFound, e.message ?: "")
                 }
             }
-            get(path = "t/tokens/{id}") {
+            get(path = AuthRouting.GET_T_TOKENS_BY_ID) {
                 val id =
                     call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
                 try {
@@ -84,7 +85,7 @@ fun Application.configureAuthRouting() {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
                 }
             }
-            get(path = "t/password/match") {
+            get(path = AuthRouting.GET_MATCH_PASSWORD) {
                 val passwordMatchReceive = call.receive<PasswordMatchReceive>()
 
                 val matches = authFacade.match(passwordMatchReceive = passwordMatchReceive)

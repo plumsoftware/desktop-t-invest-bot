@@ -10,13 +10,19 @@ version = "0.0.1"
 
 dependencies {
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${libs.versions.kotlin}")
-    implementation(libs.ktor.server.status.pages)
-    implementation(libs.ktor.server.netty.jvm)
-    implementation(libs.ktor.server.core.jvm)
+    //Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.cio)
     implementation(libs.logback.classic)
-    implementation(libs.ktor.server.config.yaml)
-    testImplementation(libs.ktor.server.test.host.jvm)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.android.logging)
+    implementation(libs.ktor.client.logging.jvm)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.auth)
+
+    //Test
     testImplementation(libs.kotlin.test.junit)
 
     //Serialization
@@ -28,4 +34,7 @@ dependencies {
     //Json
     implementation(libs.serialization.json)
     implementation(libs.serialization.json.jvm)
+
+    //Module
+    implementation(project(path = ":net-core"))
 }
