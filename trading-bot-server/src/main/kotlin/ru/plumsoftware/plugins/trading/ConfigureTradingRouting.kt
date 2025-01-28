@@ -158,11 +158,11 @@ fun Application.configureTradingRouting() {
                 }
             }
 
-            post(path = "trading/t/run") {
+            post(path = TradingRouting.POST_TRADING_T_RUN) {
                 try {
-                    val modeParam = call.request.queryParameters["mode"]
+                    val modeParam = call.request.queryParameters[TradingRouting.Params.MODE]
                         ?: throw IllegalArgumentException("Invalid mode")
-                    val idParam = call.request.queryParameters["id"]
+                    val idParam = call.request.queryParameters[TradingRouting.Params.ID]
                         ?: throw IllegalArgumentException("Invalid id")
                     val mode = TradingMode.fromString(modeParam)
 
@@ -189,12 +189,12 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
                 }
             }
-            get(path = "trading/t/status") {
+            get(path = TradingRouting.GET_TRADING_T_STATUS) {
                 try {
-                    val id = call.request.queryParameters["id"]
+                    val id = call.request.queryParameters[TradingRouting.Params.ID]
                         ?: throw IllegalArgumentException("Invalid id")
                     val mode = TradingMode.fromString(
-                        call.request.queryParameters["mode"]
+                        call.request.queryParameters[TradingRouting.Params.MODE]
                             ?: throw IllegalArgumentException("Invalid mode")
                     )
 
@@ -208,15 +208,15 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest)
                 }
             }
-            post(path = "trading/t/stop") {
+            post(path = TradingRouting.POST_TRADING_T_STOP) {
                 try {
-                    val id = call.request.queryParameters["id"]
+                    val id = call.request.queryParameters[TradingRouting.Params.ID]
                         ?: throw IllegalArgumentException("Invalid id")
                     val mode = TradingMode.fromString(
-                        call.request.queryParameters["mode"]
+                        call.request.queryParameters[TradingRouting.Params.MODE]
                             ?: throw IllegalArgumentException("Invalid mode")
                     )
-                    val startValue = call.request.queryParameters["startValue"]
+                    val startValue = call.request.queryParameters[TradingRouting.Params.START_VALUE]
                         ?: throw IllegalArgumentException("Invalid start value")
 
                     val calendar = Calendar.getInstance()
@@ -264,16 +264,16 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest)
                 }
             }
-            post(path = "destrop/t/api") {
+            post(path = TradingRouting.POST_DESTROY_T_API) {
                 tTradingFacade.destroy()
                 call.respond(HttpStatusCode.OK)
             }
 
-            get(path = "trading/statistic") {
+            get(path = TradingRouting.GET_TRADING_T_STATISTIC) {
                 try {
-                    val modeParam = call.request.queryParameters["mode"]
+                    val modeParam = call.request.queryParameters[TradingRouting.Params.MODE]
                         ?: throw IllegalArgumentException("Invalid mode")
-                    val userId = call.request.queryParameters["id"]
+                    val userId = call.request.queryParameters[TradingRouting.Params.ID]
                         ?: throw IllegalArgumentException("Invalid id")
                     val mode = TradingMode.fromString(modeParam)
 
