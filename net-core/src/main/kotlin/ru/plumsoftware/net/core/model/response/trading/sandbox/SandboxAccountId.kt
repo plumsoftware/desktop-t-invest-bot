@@ -6,4 +6,8 @@ import kotlinx.serialization.Serializable
 data class SandboxAccountId(
     val name: String,
     val accountId: String
-)
+) {
+    companion object {
+        fun empty() = SandboxAccountId(name = "", accountId = "")
+    }
+}

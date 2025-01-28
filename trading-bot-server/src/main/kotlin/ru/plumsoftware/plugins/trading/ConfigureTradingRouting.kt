@@ -100,7 +100,7 @@ fun Application.configureTradingRouting() {
                 }
             }
 
-            get(path = "trading/t/sandbox/accounts") {
+            get(path = TradingRouting.GET_TRADING_T_SANDBOX_ACCOUNTS) {
                 try {
                     val list = tTradingFacade.getAccounts()
                     call.respond(HttpStatusCode.OK, list)
@@ -108,8 +108,8 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
                 }
             }
-            get(path = "trading/t/sandbox/init_account/{name}") {
-                val name = call.parameters["name"] ?: throw IllegalArgumentException("Invalid name")
+            get(path = TradingRouting.GET_TRADING_T_SANDBOX_INIT_ACCOUNT) {
+                val name = call.parameters[TradingRouting.Params.NAME] ?: throw IllegalArgumentException("Invalid name")
                 try {
                     val accountId = tTradingFacade.initSandboxAccount(name = name)
                     call.respond(HttpStatusCode.OK, accountId)
@@ -117,7 +117,7 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
                 }
             }
-            post(path = "trading/t/sandbox/close_account") {
+            post(path = TradingRouting.POST_TRADING_T_CLOSE_SANDBOX_ACCOUNT) {
                 try {
                     tTradingFacade.closeSandboxAccount()
                     call.respond(HttpStatusCode.OK)
