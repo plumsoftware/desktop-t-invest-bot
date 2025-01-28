@@ -7,6 +7,8 @@ object TradingRouting {
     const val GET_TRADING_T_SANDBOX_ACCOUNTS = "trading/t/sandbox/accounts"
     const val GET_TRADING_T_SANDBOX_INIT_ACCOUNT = "trading/t/sandbox/init_account/{name}"
     const val POST_TRADING_T_CLOSE_SANDBOX_ACCOUNT = "trading/t/sandbox/close_account"
+    const val GET_TRADING_T_MARKET_INSTRUMENT = "trading/t/market/instrument/{id}"
+    const val GET_TRADING_T_PORTFOLIO = "trading/t/portfolio"
 
     object Params {
         const val MODE = "mode"

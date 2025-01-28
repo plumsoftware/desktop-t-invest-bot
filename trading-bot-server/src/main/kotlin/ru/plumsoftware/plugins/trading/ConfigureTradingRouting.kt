@@ -126,8 +126,8 @@ fun Application.configureTradingRouting() {
                 }
             }
 
-            get(path = "trading/t/market/instrument/{id}") {
-                val id = call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
+            get(path = TradingRouting.GET_TRADING_T_MARKET_INSTRUMENT) {
+                val id = call.parameters[TradingRouting.Params.ID] ?: throw IllegalArgumentException("Invalid id")
 
                 try {
                     call.respond(HttpStatusCode.OK, tTradingFacade.getMarketInstrumentBy(id = id))
@@ -135,9 +135,9 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest)
                 }
             }
-            get(path = "trading/t/portfolio") {
+            get(path = TradingRouting.GET_TRADING_T_PORTFOLIO) {
                 try {
-                    val modeParam = call.request.queryParameters["mode"]
+                    val modeParam = call.request.queryParameters[TradingRouting.Params.MODE]
                         ?: throw IllegalArgumentException("Invalid mode")
                     val mode = TradingMode.fromString(modeParam)
                     if (mode != null) {

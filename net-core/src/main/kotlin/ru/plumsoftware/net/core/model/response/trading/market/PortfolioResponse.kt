@@ -6,7 +6,11 @@ import kotlinx.serialization.Serializable
 data class PortfolioResponse(
     val totalPortfolio: MoneyResponse,
     val positions: List<PositionResponse>
-)
+) {
+    companion object {
+        fun empty() = PortfolioResponse(totalPortfolio = MoneyResponse.empty(), positions = emptyList())
+    }
+}
 
 @Serializable
 data class MoneyResponse(
