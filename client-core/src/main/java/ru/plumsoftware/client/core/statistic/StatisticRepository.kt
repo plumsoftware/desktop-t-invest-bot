@@ -20,6 +20,6 @@ class StatisticRepository(private val client: HttpClient, private val baseUrl: S
 
         return if (response.status.value in 200..299) {
             response.body<List<StatisticReceive>>()
-        } else throw Exception(response.status.description)
+        } else emptyList()
     }
 }

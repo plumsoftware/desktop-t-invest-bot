@@ -15,6 +15,7 @@ import ru.plumsoftware.facade.TTradingFacade
 import ru.plumsoftware.model.TradingMode
 import ru.plumsoftware.net.core.model.receive.StatisticReceive
 import ru.plumsoftware.net.core.model.receive.trading.TradingModelsReceive
+import ru.plumsoftware.net.core.routing.TradingRouting
 import ru.plumsoftware.plugins.auth.AuthConfig
 import ru.plumsoftware.repository.market.MarketRepositoryImpl
 import ru.plumsoftware.repository.sandbox.SandboxRepositoryImpl
@@ -44,8 +45,8 @@ fun Application.configureTradingRouting() {
 
     routing {
         authenticate(AuthConfig.BEARER_AUTH) {
-            post(path = "trading/models/t") {
-                val modeParam = call.request.queryParameters["mode"]
+            post(path = TradingRouting.POST_T_TRADING_MODELS) {
+                val modeParam = call.request.queryParameters[TradingRouting.Params.MODE]
                     ?: throw IllegalArgumentException("Invalid id")
                 val mode = TradingMode.fromString(modeParam)
 
@@ -71,7 +72,7 @@ fun Application.configureTradingRouting() {
                     }
                 }
             }
-            get(path = "trading/models/{id}") {
+            get(path = TradingRouting.GET_TRADING_MODELS) {
                 try {
                     val idParam = call.parameters["id"]
                         ?: throw IllegalArgumentException("Invalid id")
@@ -84,8 +85,8 @@ fun Application.configureTradingRouting() {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "")
                 }
             }
-            post(path = "trading/t/init/{id}") {
-                val id = call.parameters["id"] ?: throw IllegalArgumentException("Invalid id")
+            post(path = TradingRouting.POST_INIT_T_TRADING) {
+                val id = call.parameters[TradingRouting.Params.ID] ?: throw IllegalArgumentException("Invalid id")
                 try {
                     val tTokensReceive = authFacade.getTTokens(id = id.toLong())
                     if (tTokensReceive == null)
