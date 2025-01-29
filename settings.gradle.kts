@@ -24,12 +24,16 @@ dependencyResolutionManagement {
     }
 }
 
-include(":desktop-compose-app")
-include(":android-app")
 include(":trading-bot-server")
 include(":net-core")
+
 include(":trading-core:t-trading")
-include(":client-core-core")
-include(":ui-core:theme-core")
+
+include(":client-core")
 include(":telegram-bot")
+include(":desktop-compose-app")
+include(":android-app")
+
+include(":ui-core:theme-core")
 include(":ui-core:components")
+include(":ui-core:navigation")

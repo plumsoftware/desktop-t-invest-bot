@@ -6,17 +6,6 @@ plugins {
 group = "ru.plumsoftware"
 version = "1.0-SNAPSHOT"
 
-compose.resources {
-    publicResClass = true
-    packageOfResClass = "ru.plumsoftware.ui.core.resources"
-    generateResClass = auto
-
-    customDirectory(
-        sourceSetName = "main",
-        directoryProvider = provider { layout.projectDirectory.dir("src/main/coreResources") }
-    )
-}
-
 dependencies {
     //Auto generated
     implementation(compose.runtime)
@@ -32,4 +21,8 @@ dependencies {
 
     //Test
     testImplementation(kotlin("test"))
+
+    //Module
+    implementation(project(":ui-core:theme-core"))
+    implementation(project(":ui-core:components"))
 }
