@@ -5,5 +5,7 @@
     <string name="auth">Авторизоваться</string>
 
     <string name="enter_phone_hint">Введите номер телефона</string>
+    <string name="enter_name_hint">Введите Имя Фамилия Отчество</string>
+    <string name="enter_password_hint">Введите пароль</string>
     <string name="continu">Продолжить</string>
 </resources>
