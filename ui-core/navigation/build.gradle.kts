@@ -16,8 +16,14 @@ dependencies {
     implementation(compose.components.uiToolingPreview)
     implementation(compose.desktop.currentOs)
 
+    //View model
+    implementation(libs.lifecycle.viewmodel.compose)
+
     //Material
     implementation(libs.material3)
+
+    //Precompose
+    implementation(libs.precompose)
 
     //Test
     testImplementation(kotlin("test"))

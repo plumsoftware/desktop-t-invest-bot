@@ -18,15 +18,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import moe.tlaster.precompose.navigation.Navigator
+import moe.tlaster.precompose.navigation.rememberNavigator
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.plumsoftware.components.bar.top.PrimaryTopAppBar
 import ru.plumsoftware.components.button.PrimaryButton
 import ru.plumsoftware.components.button.PrimaryOutlinedButton
+import ru.plumsoftware.navigation.Route
+import ru.plumsoftware.navigation.auth.variant.model.Effect
+import ru.plumsoftware.navigation.auth.variant.model.Event
 import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.theme.Space
 import ru.plumsoftware.theme.disabled
@@ -39,7 +46,23 @@ import ru.plumsoftware.ui.core.resources.register
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthVariant() {
+fun AuthVariant(onlyAuth: Boolean = false, navigator: Navigator) {
+
+    val viewModel = viewModel { AuthVariantViewModel() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect {
+            when (it) {
+                Effect.Auth -> {
+                    navigator.navigate(route = Route.AUTH)
+                }
+                Effect.Register -> {
+                    navigator.navigate(route = Route.REGISTER)
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             PrimaryTopAppBar(
@@ -73,46 +96,52 @@ fun AuthVariant() {
                 ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                PrimaryButton(
-                    text = stringResource(Res.string.register),
-                    enabled = true,
-                    isLoading = false,
-                    onClick = {}
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = Space.small,
-                        alignment = Alignment.CenterHorizontally
+                if (!onlyAuth) {
+                    PrimaryButton(
+                        text = stringResource(Res.string.register),
+                        enabled = true,
+                        isLoading = false,
+                        onClick = {
+                            viewModel.onEvent(Event.Register)
+                        }
                     )
-                ) {
-                    Divider(
-                        modifier = Modifier
-                            .weight(1.0f)
-                            .padding(start = Space.medium)
-                            .clip(shape = MaterialTheme.shapes.small),
-                        thickness = 2.dp,
-                        color = LocalContentColor.current.disabled()
-                    )
-                    Text(
-                        text = stringResource(Res.string.or),
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground.disabled())
-                    )
-                    Divider(
-                        modifier = Modifier
-                            .weight(1.0f)
-                            .padding(end = Space.medium)
-                            .clip(shape = MaterialTheme.shapes.small),
-                        thickness = 2.dp,
-                        color = LocalContentColor.current.disabled()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            space = Space.small,
+                            alignment = Alignment.CenterHorizontally
+                        )
+                    ) {
+                        Divider(
+                            modifier = Modifier
+                                .weight(1.0f)
+                                .padding(start = Space.medium)
+                                .clip(shape = MaterialTheme.shapes.small),
+                            thickness = 2.dp,
+                            color = LocalContentColor.current.disabled()
+                        )
+                        Text(
+                            text = stringResource(Res.string.or),
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground.disabled())
+                        )
+                        Divider(
+                            modifier = Modifier
+                                .weight(1.0f)
+                                .padding(end = Space.medium)
+                                .clip(shape = MaterialTheme.shapes.small),
+                            thickness = 2.dp,
+                            color = LocalContentColor.current.disabled()
+                        )
+                    }
                 }
                 PrimaryOutlinedButton(
                     text = stringResource(Res.string.auth),
                     isLoading = false,
                     enabled = true,
-                    onClick = {}
+                    onClick = {
+                        viewModel.onEvent(Event.Auth)
+                    }
                 )
             }
         }
@@ -123,6 +152,6 @@ fun AuthVariant() {
 @Preview
 private fun AuthVariantPreview() {
     AppTheme(useDarkTheme = true) {
-        AuthVariant()
+        AuthVariant(navigator = rememberNavigator())
     }
 }
