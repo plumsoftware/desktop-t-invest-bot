@@ -3,4 +3,7 @@
     <string name="register">Зарегистрироваться</string>
     <string name="or">или</string>
     <string name="auth">Авторизоваться</string>
+
+    <string name="enter_phone_hint">Введите номер телефона</string>
+    <string name="continu">Продолжить</string>
 </resources>

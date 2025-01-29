@@ -4,6 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -20,7 +21,8 @@ import ru.plumsoftware.theme.Space
 fun PrimaryButton(text: String, enabled: Boolean, isLoading: Boolean, onClick: () -> Unit) {
     Button(
         modifier = Modifier
-            .defaultMinSize(150.dp, 50.dp),
+            .defaultMinSize(150.dp, 50.dp)
+            .fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
