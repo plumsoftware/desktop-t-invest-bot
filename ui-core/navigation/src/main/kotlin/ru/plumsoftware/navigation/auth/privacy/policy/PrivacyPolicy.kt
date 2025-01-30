@@ -47,9 +47,9 @@ fun PrivacyPolicy(navigator: Navigator) {
                 title = stringResource(Res.string.privacy_policy_title)
             )
         }
-    ) {
+    ) { paddingValues->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(all = Space.small),
+            modifier = Modifier.fillMaxSize().padding(all = Space.small).padding(paddingValues = paddingValues),
             verticalArrangement = Arrangement.spacedBy(
                 space = Space.medium,
                 alignment = Alignment.CenterVertically
@@ -67,7 +67,7 @@ fun PrivacyPolicy(navigator: Navigator) {
                 PrimaryButton(
                     text = stringResource(Res.string.read),
                     enabled = true,
-                    isLoading = true,
+                    isLoading = false,
                     onClick = {
                         viewModel.onEvent(Event.Read)
                     }

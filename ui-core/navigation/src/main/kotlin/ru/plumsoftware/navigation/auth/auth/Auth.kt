@@ -40,8 +40,8 @@ import ru.plumsoftware.ui.core.resources.auth
 import ru.plumsoftware.ui.core.resources.continu
 import ru.plumsoftware.ui.core.resources.enter_password_hint
 import ru.plumsoftware.ui.core.resources.enter_phone_hint
-import ru.plumsoftware.ui.core.resources.privacy_policy
 import ru.plumsoftware.ui.core.resources.privacy_policy_agree
+import ru.plumsoftware.ui.core.resources.privacy_policy_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +61,7 @@ fun Auth(navigator: Navigator, needConfirmNumber: Boolean = true) {
                     if (needConfirmNumber)
                         navigator.navigate(route = Route.Auth.CONFIRM_NUMBER)
                     else
-                        navigator.navigate(route = Route.Main.HOME)
+                        navigator.navigate(route = Route.Group.MAIN)
                 }
 
                 Effect.PrivacyPolicy -> {
@@ -135,7 +135,7 @@ fun Auth(navigator: Navigator, needConfirmNumber: Boolean = true) {
                     Text(text = stringResource(Res.string.privacy_policy_agree))
                 }
                 TertiaryTextButton(
-                    text = stringResource(Res.string.privacy_policy),
+                    text = stringResource(Res.string.privacy_policy_title),
                     enabled = true,
                     onClick = {
                         viewModel.onEvent(Event.PrivacyPolicy)

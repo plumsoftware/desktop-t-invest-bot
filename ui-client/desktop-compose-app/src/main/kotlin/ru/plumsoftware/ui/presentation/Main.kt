@@ -19,11 +19,17 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
-import org.jetbrains.compose.resources.InternalResourceApi
 import ru.plumsoftware.core.brokerage.market.MarketRepositoryImpl
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
 import ru.plumsoftware.log.repository.LogRepositoryImpl
+import ru.plumsoftware.navigation.Route
+import ru.plumsoftware.navigation.auth.auth.Auth
+import ru.plumsoftware.navigation.auth.privacy.policy.PrivacyPolicy
+import ru.plumsoftware.navigation.auth.variant.AuthVariant
+import ru.plumsoftware.navigation.confirm.number.ConfirmNumber
+import ru.plumsoftware.platform.specific.PlatformSpecificImpl
+import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.ui.presentation.screens.select.sandbox.SelectSandboxAccount
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
 import ru.plumsoftware.ui.presentation.screens.market.MarketScreen
@@ -31,9 +37,7 @@ import ru.plumsoftware.ui.presentation.screens.sandbox.SandboxScreen
 import ru.plumsoftware.ui.presentation.screens.select.market.SelectMarketAccount
 import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
-import ru.plumsoftware.ui.theme.AppTheme
 
-@OptIn(InternalResourceApi::class)
 fun main(): Unit = runBlocking {
 
     val settingsRepository = SettingsRepositoryImpl()
@@ -56,7 +60,7 @@ fun main(): Unit = runBlocking {
         Window(
             onCloseRequest = ::exitApplication,
             icon = BitmapPainter(useResource("logo.png", ::loadImageBitmap)),
-            title = "T инвест бот",
+            title = "Торговый робот",
             state = windowState,
         ) {
             PreComposeApp {
@@ -66,9 +70,34 @@ fun main(): Unit = runBlocking {
                     NavHost(
                         navigator = navigator,
                         navTransition = NavTransition(),
-                        initialRoute = DesktopRouting.home,
+                        initialRoute = Route.Group.AUTH,
                         modifier = Modifier.padding(all = 0.dp)
                     ) {
+
+                        group(route = Route.Group.AUTH, initialRoute = Route.Auth.AUTH_VARIANT) {
+                            scene(route = Route.Auth.AUTH_VARIANT) {
+                                AuthVariant(
+                                    onlyAuth = true,
+                                    navigator = navigator
+                                )
+                            }
+                            scene(route = Route.Auth.AUTHENTICATION) {
+                                Auth(
+                                    navigator = navigator,
+                                    needConfirmNumber = false
+                                )
+                            }
+                            scene(route = Route.Auth.PRIVACY_POLICY) {
+                                PrivacyPolicy(navigator = navigator)
+                            }
+                        }
+
+                        group(route = Route.Group.MAIN, initialRoute = Route.Main.HOME) {
+                            scene(route = Route.Main.HOME) {
+
+                            }
+                        }
+
                         scene(route = DesktopRouting.home) {
                             MainScreen(
                                 navigator = navigator

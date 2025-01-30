@@ -29,7 +29,10 @@ fun PrimaryButton(text: String, enabled: Boolean, isLoading: Boolean, onClick: (
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         enabled = enabled,
-        onClick = onClick,
+        onClick = {
+            if (!isLoading)
+                onClick()
+        },
     ) {
         if (isLoading)
             CircularProgressIndicator(

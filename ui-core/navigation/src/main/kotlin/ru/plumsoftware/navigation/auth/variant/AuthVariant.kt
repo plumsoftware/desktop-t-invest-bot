@@ -54,7 +54,7 @@ fun AuthVariant(onlyAuth: Boolean = false, navigator: Navigator) {
         viewModel.effect.collect {
             when (it) {
                 Effect.Auth -> {
-                    navigator.navigate(route = Route.Auth.AUTH)
+                    navigator.navigate(route = Route.Auth.AUTHENTICATION)
                 }
                 Effect.Register -> {
                     navigator.navigate(route = Route.Auth.REGISTER)

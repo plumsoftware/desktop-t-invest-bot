@@ -57,6 +57,11 @@ dependencies {
 
     //Test
     testImplementation(kotlin("test"))
+
+    //Module
+    implementation(project(path = ":ui-core:navigation"))
+    implementation(project(path = ":net-core"))
+    implementation(project(path = ":ui-core:theme-core"))
 }
 
 compose.desktop {
