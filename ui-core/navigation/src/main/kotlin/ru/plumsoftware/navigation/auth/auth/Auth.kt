@@ -29,6 +29,7 @@ import ru.plumsoftware.components.button.PrimaryButton
 import ru.plumsoftware.components.button.PrimaryCheckBox
 import ru.plumsoftware.components.button.text.TertiaryTextButton
 import ru.plumsoftware.components.text.input.PrimaryTextInput
+import ru.plumsoftware.components.visual.transformation.PhoneVisualTransformation
 import ru.plumsoftware.navigation.Route
 import ru.plumsoftware.navigation.auth.auth.model.Effect
 import ru.plumsoftware.navigation.auth.auth.model.Event
@@ -90,6 +91,7 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
             PrimaryTextInput(
                 startText = viewModel.state.value.phone,
                 hint = stringResource(Res.string.enter_phone_hint),
+                visualTransformation = PhoneVisualTransformation(mask = "+0-000-000-00-00", maskNumber = '0'),
                 enabled = true,
                 onValueChange = {
                     viewModel.onEvent(Event.OnPhoneChange(phone = it))

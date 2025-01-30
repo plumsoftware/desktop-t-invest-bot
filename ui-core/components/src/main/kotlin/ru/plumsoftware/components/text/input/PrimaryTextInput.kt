@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
 import ru.plumsoftware.components.button.icon.PrimaryIconWrapper
 import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.theme.Space
@@ -28,6 +29,7 @@ fun PrimaryTextInput(
     startText: String = "",
     hint: String = "",
     enabled: Boolean,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     onValueChange: (String) -> Unit
 ) {
     var text by remember { mutableStateOf(startText) }
@@ -39,6 +41,7 @@ fun PrimaryTextInput(
         shape = MaterialTheme.shapes.small,
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
         enabled = enabled,
+        visualTransformation = visualTransformation,
         placeholder = {
             Text(text = hint, style = MaterialTheme.typography.bodyLarge)
         },
