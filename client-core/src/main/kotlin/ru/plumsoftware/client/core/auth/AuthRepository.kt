@@ -7,15 +7,16 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.receive.TTokensReceive
 import ru.plumsoftware.net.core.model.receive.UserReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
-import ru.plumsoftware.net.core.routing.AuthRouting
+import ru.plumsoftware.client.core.routing.AuthRouting
 
-class AuthRepository(private val client: HttpClient, private val baseUrl: String) {
+class AuthRepository(private val client: HttpClient, private val baseUrl: String, private val accessToken: String) {
 
     suspend fun putUser(userReceive: UserReceive): UserResponseEither {
         val response: HttpResponse = client.put(urlString = baseUrl) {
@@ -43,17 +44,18 @@ class AuthRepository(private val client: HttpClient, private val baseUrl: String
         return response.status
     }
 
-    suspend fun getUserByPhone(phone: String): UserReceive? {
+    suspend fun getUserByPhone(phone: String): UserResponseEither {
         val response = client.get(urlString = baseUrl) {
             url {
-                appendPathSegments(AuthRouting.GET_USER_BY_PHONE)
-                parameters.append("phone", phone)
+                appendPathSegments("${AuthRouting.GET_USER_BY_PHONE}$phone")
+
+                headers.append(HttpHeaders.Authorization, "Bearer $accessToken")
             }
         }
 
         return if (response.status.value in 200..299)
-            response.body<UserReceive>()
-        else null
+            response.body<UserResponseEither.UserResponse>()
+        else response.body<UserResponseEither.Error>()
     }
 
     suspend fun getTTokensByUserId(id: Long): TTokensReceive? {

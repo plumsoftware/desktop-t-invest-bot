@@ -58,10 +58,23 @@ dependencies {
     //Test
     testImplementation(kotlin("test"))
 
+    //Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.logback.classic)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.android.logging)
+    implementation(libs.ktor.client.logging.jvm)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.auth)
+
     //Module
     implementation(project(path = ":ui-core:navigation"))
-    implementation(project(path = ":net-core"))
     implementation(project(path = ":ui-core:theme-core"))
+    implementation(project(path = ":client-core"))
+    implementation(project(path = ":net-core"))
 }
 
 compose.desktop {

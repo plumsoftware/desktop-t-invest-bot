@@ -19,6 +19,8 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import ru.plumsoftware.client.core.auth.AuthRepository
+import ru.plumsoftware.client.core.client
 import ru.plumsoftware.core.brokerage.market.MarketRepositoryImpl
 import ru.plumsoftware.core.brokerage.sandbox.repository.SandboxRepositoryImpl
 import ru.plumsoftware.core.settings.repository.SettingsRepositoryImpl
@@ -27,8 +29,6 @@ import ru.plumsoftware.navigation.Route
 import ru.plumsoftware.navigation.auth.auth.Auth
 import ru.plumsoftware.navigation.auth.privacy.policy.PrivacyPolicy
 import ru.plumsoftware.navigation.auth.variant.AuthVariant
-import ru.plumsoftware.navigation.confirm.number.ConfirmNumber
-import ru.plumsoftware.platform.specific.PlatformSpecificImpl
 import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.ui.presentation.screens.select.sandbox.SelectSandboxAccount
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
@@ -39,6 +39,12 @@ import ru.plumsoftware.ui.presentation.screens.settings.SettingsScreen
 import ru.plumsoftware.ui.root.DesktopRouting
 
 fun main(): Unit = runBlocking {
+
+    val authRepository = AuthRepository(
+        client = client(),
+        baseUrl = "http://127.0.0.1:8080",
+        accessToken = "SECRET",
+    )
 
     val settingsRepository = SettingsRepositoryImpl()
     val sandboxRepository = SandboxRepositoryImpl()
@@ -84,7 +90,8 @@ fun main(): Unit = runBlocking {
                             scene(route = Route.Auth.AUTHENTICATION) {
                                 Auth(
                                     navigator = navigator,
-                                    needConfirmNumber = false
+                                    needConfirmNumber = false,
+                                    authRepository = authRepository
                                 )
                             }
                             scene(route = Route.Auth.PRIVACY_POLICY) {

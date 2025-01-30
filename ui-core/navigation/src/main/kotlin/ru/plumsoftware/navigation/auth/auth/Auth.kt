@@ -1,6 +1,5 @@
 package ru.plumsoftware.navigation.auth.auth
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.navigation.rememberNavigator
 import org.jetbrains.compose.resources.stringResource
+import ru.plumsoftware.client.core.auth.AuthRepository
 import ru.plumsoftware.components.bar.top.PrimaryTopAppBar
 import ru.plumsoftware.components.button.PrimaryButton
 import ru.plumsoftware.components.button.PrimaryCheckBox
@@ -33,7 +32,6 @@ import ru.plumsoftware.components.text.input.PrimaryTextInput
 import ru.plumsoftware.navigation.Route
 import ru.plumsoftware.navigation.auth.auth.model.Effect
 import ru.plumsoftware.navigation.auth.auth.model.Event
-import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.theme.Space
 import ru.plumsoftware.ui.core.resources.Res
 import ru.plumsoftware.ui.core.resources.auth
@@ -45,9 +43,9 @@ import ru.plumsoftware.ui.core.resources.privacy_policy_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Auth(navigator: Navigator, needConfirmNumber: Boolean = true) {
+fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber: Boolean = true) {
 
-    val viewModel = viewModel { AuthViewModel() }
+    val viewModel = viewModel { AuthViewModel(authRepository = authRepository) }
     var readPrivacyPolicy by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -143,13 +141,5 @@ fun Auth(navigator: Navigator, needConfirmNumber: Boolean = true) {
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun AuthPreview() {
-    AppTheme {
-        Auth(navigator = rememberNavigator())
     }
 }

@@ -31,4 +31,6 @@ dependencies {
     //Module
     implementation(project(":ui-core:theme-core"))
     implementation(project(":ui-core:components"))
+    implementation(project(":client-core"))
+    implementation(project(":net-core"))
 }
