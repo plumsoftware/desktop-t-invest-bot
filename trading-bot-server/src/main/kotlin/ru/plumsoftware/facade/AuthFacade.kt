@@ -117,7 +117,7 @@ class AuthFacade(
         } else throw Exception("Invalid id")
     }
 
-    suspend fun getUser(phone: String): UserReceive? {
+    suspend fun getUser(phone: String): UserResponseEither {
 
         var id: Long? = null
         var exitLoop = false
@@ -146,24 +146,10 @@ class AuthFacade(
         }
 
         return if (id != null) {
-            val secretKey = cryptographyService.stringToKey(
-                authService.getSecretKey(id = id) ?: throw Exception("Invalid secret key")
+            UserResponseEither.UserResponse(
+                id = id
             )
-            val name = cryptographyService.decrypt(
-                authService.getName(id = id) ?: throw Exception("Invalid name"), secretKey
-            )
-            val password =
-                authService.getPassword(id = id) ?: throw Exception("Invalid password")
-            val phoneFromRemote = cryptographyService.decrypt(
-                authService.getPhone(id = id) ?: throw Exception("Invalid phone"), secretKey
-            )
-
-            UserReceive(
-                password = password,
-                name = name,
-                phone = phoneFromRemote
-            )
-        } else null
+        } else UserResponseEither.Error(msg = "Invalid id")
     }
 
     suspend fun getTradingModels(id: Long): TradingModelsReceive {

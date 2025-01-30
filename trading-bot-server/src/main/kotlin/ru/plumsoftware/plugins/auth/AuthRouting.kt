@@ -63,11 +63,10 @@ fun Application.configureAuthRouting() {
                 val phone =
                     call.parameters["phone"] ?: throw IllegalArgumentException("Invalid phone")
                 try {
-                    val userDto = authFacade.getUser(phone = phone)
-                    if (userDto != null)
-                        call.respond(HttpStatusCode.OK, userDto)
-                    else
-                        call.respond(HttpStatusCode.NotFound)
+                    when (val userResponseEither = authFacade.getUser(phone = phone)) {
+                        is UserResponseEither.Error -> call.respond(HttpStatusCode.NotFound, userResponseEither)
+                        is UserResponseEither.UserResponse -> call.respond(HttpStatusCode.OK, userResponseEither)
+                    }
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.NotFound, e.message ?: "")
                 }
