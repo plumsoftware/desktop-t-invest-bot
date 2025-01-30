@@ -7,6 +7,7 @@ object Route {
         const val REGISTER = "/register"
         const val AUTH = "/auth"
         const val CONFIRM_NUMBER = "/confirm_number"
+        const val PRIVACY_POLICY = "/privacy_policy"
     }
 
     object Main {

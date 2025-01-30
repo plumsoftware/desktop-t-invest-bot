@@ -1,4 +1,4 @@
-package ru.plumsoftware.components.button
+package ru.plumsoftware.components.button.text
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement

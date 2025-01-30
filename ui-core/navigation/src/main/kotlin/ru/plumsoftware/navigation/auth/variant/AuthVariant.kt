@@ -71,7 +71,7 @@ fun AuthVariant(onlyAuth: Boolean = false, navigator: Navigator) {
         }
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(all = Space.small),
             verticalArrangement = Arrangement.spacedBy(
                 space = Space.large,
                 alignment = Alignment.CenterVertically

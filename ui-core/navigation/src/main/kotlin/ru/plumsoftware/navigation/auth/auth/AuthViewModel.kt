@@ -31,9 +31,21 @@ class AuthViewModel : ViewModel() {
                 }
             }
 
+            is Event.OnPasswordChange -> {
+                state_.update {
+                    it.copy(password = event.password)
+                }
+            }
+
             Event.Back -> {
                 viewModelScope.launch {
                     effect.emit(Effect.Back)
+                }
+            }
+
+            Event.PrivacyPolicy -> {
+                viewModelScope.launch {
+                    effect.emit(Effect.PrivacyPolicy)
                 }
             }
         }

@@ -38,6 +38,17 @@ class RegisterViewModel : ViewModel() {
                     it.copy(password = event.password)
                 }
             }
+
+            is Event.OnPhoneChanged -> {
+                state_.update {
+                    it.copy(phone = event.phone)
+                }
+            }
+            Event.PrivacyPolicy -> {
+                viewModelScope.launch {
+                    effect.emit(Effect.PrivacyPolicy)
+                }
+            }
         }
     }
 }
