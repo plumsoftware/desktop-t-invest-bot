@@ -31,7 +31,7 @@ include(":trading-core:t-trading")
 
 include(":client-core")
 include(":ui-client:telegram-bot")
-include(":ui-client:desktop-compose-app")
+include(":ui-client:desktop-app")
 include(":ui-client:android-app")
 
 include(":ui-core:theme-core")
