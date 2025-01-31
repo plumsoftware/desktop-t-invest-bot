@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.plumsoftware.PlatformSpecific
 import ru.plumsoftware.navigation.confirm.number.model.Action
 import ru.plumsoftware.navigation.confirm.number.model.Effect
 import ru.plumsoftware.navigation.confirm.number.model.Event
 import ru.plumsoftware.navigation.confirm.number.model.State
+import ru.plumsoftware.platform.specific.PlatformSpecific
 import kotlin.random.Random
 
 class ConfirmNumberViewModel(

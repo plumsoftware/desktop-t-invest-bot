@@ -16,9 +16,11 @@ import ru.plumsoftware.navigation.auth.auth.model.Event
 import ru.plumsoftware.navigation.auth.auth.model.State
 import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
+import ru.plumsoftware.platform.specific.SettingsRepository
 
 class AuthViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     val state = MutableStateFlow(State.default())
 
@@ -57,6 +59,7 @@ class AuthViewModel(
 
                             if (passwordMatch.value in 200..299) {
                                 loading(false)
+                                settingsRepository.saveUserId(id = id)
                                 withContext(Dispatchers.Main) {
                                     effect.emit(Effect.Next)
                                 }

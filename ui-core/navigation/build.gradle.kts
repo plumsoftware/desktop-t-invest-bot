@@ -1,48 +1,85 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.android.library)
     id("org.jetbrains.compose")
 }
+kotlin {
 
-group = "ru.plumsoftware"
-version = "1.0-SNAPSHOT"
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
 
-dependencies {
-    //Auto generated
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.material)
-    implementation(compose.ui)
-    implementation(compose.components.resources)
-    implementation(compose.components.uiToolingPreview)
-    implementation(compose.desktop.currentOs)
+    androidTarget {
+        publishLibraryVariants("release")
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
 
-    //View model
-    implementation(libs.lifecycle.viewmodel.compose)
 
-    //Material
-    implementation(libs.material3)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                //Auto generated
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(compose.desktop.currentOs)
 
-    //Precompose
-    implementation(libs.precompose)
+                //View model
+                implementation(libs.lifecycle.viewmodel.compose)
 
-    //Client
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.logback.classic)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.android.logging)
-    implementation(libs.ktor.client.logging.jvm)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.auth)
+                //Material
+                implementation(libs.material3)
 
-    //Test
-    testImplementation(kotlin("test"))
+                //Precompose
+                implementation(libs.precompose)
 
-    //Module
-    implementation(project(":ui-core:theme-core"))
-    implementation(project(":ui-core:components"))
-    implementation(project(":client-core"))
-    implementation(project(":net-core"))
+                //Client
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.ktor.client.cio)
+                implementation(libs.logback.classic)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.android.logging)
+                implementation(libs.ktor.client.logging.jvm)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.client.auth)
+
+                //Module
+                implementation(project(":ui-core:theme-core"))
+                implementation(project(":ui-core:components"))
+                implementation(project(":client-core"))
+                implementation(project(":net-core"))
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+    }
 }
+
+android {
+    namespace = "ru.plumsoftware"
+    compileSdk = 35
+    defaultConfig {
+        minSdk = 24
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+    dependencies {}
+}
+dependencies {}

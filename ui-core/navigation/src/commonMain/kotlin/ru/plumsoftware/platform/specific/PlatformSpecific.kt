@@ -1,4 +1,4 @@
-package ru.plumsoftware
+package ru.plumsoftware.platform.specific
 
 interface PlatformSpecific {
     fun sendCode()

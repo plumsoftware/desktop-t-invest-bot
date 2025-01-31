@@ -13,13 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import moe.tlaster.precompose.navigation.Navigator
 import org.jetbrains.compose.resources.stringResource
-import ru.plumsoftware.PlatformSpecific
 import ru.plumsoftware.components.bar.top.PrimaryTopAppBar
 import ru.plumsoftware.components.button.PrimaryButton
 import ru.plumsoftware.components.text.input.PrimaryTextInput
 import ru.plumsoftware.navigation.confirm.number.model.Action
 import ru.plumsoftware.navigation.confirm.number.model.Effect
 import ru.plumsoftware.navigation.confirm.number.model.Event
+import ru.plumsoftware.platform.specific.PlatformSpecific
 import ru.plumsoftware.theme.Space
 import ru.plumsoftware.ui.core.resources.Res
 import ru.plumsoftware.ui.core.resources.auth

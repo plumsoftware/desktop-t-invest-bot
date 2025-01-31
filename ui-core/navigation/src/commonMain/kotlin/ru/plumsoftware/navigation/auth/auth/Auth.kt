@@ -37,6 +37,7 @@ import ru.plumsoftware.navigation.Route
 import ru.plumsoftware.navigation.auth.auth.model.Effect
 import ru.plumsoftware.navigation.auth.auth.model.Event
 import ru.plumsoftware.theme.Space
+import ru.plumsoftware.platform.specific.SettingsRepository
 import ru.plumsoftware.ui.core.resources.Res
 import ru.plumsoftware.ui.core.resources.auth
 import ru.plumsoftware.ui.core.resources.continu
@@ -47,9 +48,9 @@ import ru.plumsoftware.ui.core.resources.privacy_policy_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber: Boolean = true) {
+fun Auth(navigator: Navigator, authRepository: AuthRepository, settingsRepository: SettingsRepository, needConfirmNumber: Boolean = true) {
 
-    val viewModel = viewModel { AuthViewModel(authRepository = authRepository) }
+    val viewModel = viewModel { AuthViewModel(authRepository = authRepository, settingsRepository = settingsRepository) }
     val state by viewModel.state.collectAsState()
     var readPrivacyPolicy by remember { mutableStateOf(false) }
 

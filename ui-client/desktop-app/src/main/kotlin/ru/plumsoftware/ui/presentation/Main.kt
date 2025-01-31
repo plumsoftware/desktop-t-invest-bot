@@ -29,6 +29,7 @@ import ru.plumsoftware.navigation.Route
 import ru.plumsoftware.navigation.auth.auth.Auth
 import ru.plumsoftware.navigation.auth.privacy.policy.PrivacyPolicy
 import ru.plumsoftware.navigation.auth.variant.AuthVariant
+import ru.plumsoftware.platform.specific.SettingsRepository
 import ru.plumsoftware.theme.AppTheme
 import ru.plumsoftware.ui.presentation.screens.select.sandbox.SelectSandboxAccount
 import ru.plumsoftware.ui.presentation.screens.main.MainScreen
@@ -45,6 +46,7 @@ fun main(): Unit = runBlocking {
         baseUrl = "http://127.0.0.1:8080",
         accessToken = "SECRET", //TODO(remove token)
     )
+    val platformSettingsRepository = SettingsRepository()
 
     val settingsRepository = SettingsRepositoryImpl()
     val sandboxRepository = SandboxRepositoryImpl()
@@ -91,7 +93,8 @@ fun main(): Unit = runBlocking {
                                 Auth(
                                     navigator = navigator,
                                     needConfirmNumber = false,
-                                    authRepository = authRepository
+                                    authRepository = authRepository,
+                                    settingsRepository = platformSettingsRepository
                                 )
                             }
                             scene(route = Route.Auth.PRIVACY_POLICY) {
