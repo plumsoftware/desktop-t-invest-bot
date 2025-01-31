@@ -1,4 +1,4 @@
-rootProject.name = "t-invest-bot"
+rootProject.name = "trading-bot"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
