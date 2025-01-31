@@ -29,11 +29,11 @@ include(":net-core")
 
 include(":trading-core:t-trading")
 
-include(":client-core")
-include(":ui-client:telegram-bot")
-include(":ui-client:desktop-app")
-include(":ui-client:android-app")
+include(":client:client-core")
+include(":client:ui-client:telegram-bot")
+include(":client:ui-client:desktop-app")
+include(":client:ui-client:android-app")
 
-include(":ui-core:theme-core")
-include(":ui-core:components")
-include(":ui-core:navigation")
+include(":client:ui-core:theme-core")
+include(":client:ui-core:components")
+include(":client:ui-core:navigation")
