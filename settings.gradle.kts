@@ -24,7 +24,7 @@ dependencyResolutionManagement {
     }
 }
 
-include(":trading-bot-server")
+include(":server:trading-bot")
 include(":shared-server-client:net-core")
 
 include(":trading-core:t-trading")
