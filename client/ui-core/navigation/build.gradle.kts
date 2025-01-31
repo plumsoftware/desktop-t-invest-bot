@@ -41,5 +41,5 @@ dependencies {
     implementation(project(":client:ui-core:theme-core"))
     implementation(project(":client:ui-core:components"))
     implementation(project(":client:client-core"))
-    implementation(project(":net-core"))
+    implementation(project(":shared-server-client:net-core"))
 }

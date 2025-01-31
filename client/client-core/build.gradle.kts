@@ -50,7 +50,7 @@ kotlin {
                 implementation(libs.serialization.json.jvm)
 
                 //Module
-                implementation(project(path = ":net-core"))
+                implementation(project(path = ":shared-server-client:net-core"))
             }
         }
         val commonTest by getting {

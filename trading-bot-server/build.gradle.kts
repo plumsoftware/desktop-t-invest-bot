@@ -49,6 +49,6 @@ dependencies {
     implementation(libs.ktor.server.auth)
 
     //Modules
-    implementation(project(path = ":net-core"))
+    implementation(project(path = ":shared-server-client:net-core"))
     implementation(project(path = ":trading-core:t-trading"))
 }

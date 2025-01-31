@@ -74,7 +74,7 @@ dependencies {
     implementation(project(path = ":client:ui-core:navigation"))
     implementation(project(path = ":client:ui-core:theme-core"))
     implementation(project(path = ":client:client-core"))
-    implementation(project(path = ":net-core"))
+    implementation(project(path = ":shared-server-client:net-core"))
 }
 
 compose.desktop {

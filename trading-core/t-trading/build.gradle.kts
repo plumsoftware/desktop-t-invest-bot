@@ -17,5 +17,5 @@ dependencies {
     implementation(libs.java.sdk.core)
 
     //Modules
-    implementation(project(path = ":net-core"))
+    implementation(project(path = ":shared-server-client:net-core"))
 }
