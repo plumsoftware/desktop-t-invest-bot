@@ -74,8 +74,11 @@ class AuthRepository(private val client: HttpClient, private val baseUrl: String
         val response = client.get(urlString = baseUrl) {
             url {
                 appendPathSegments(AuthRouting.GET_MATCH_PASSWORD)
+
+                headers.append(HttpHeaders.Authorization, "Bearer $accessToken")
+                headers.append(HttpHeaders.ContentType, "application/json")
             }
-            setBody(passwordMatchReceive)
+            setBody(body = passwordMatchReceive)
         }
         return response.status
     }

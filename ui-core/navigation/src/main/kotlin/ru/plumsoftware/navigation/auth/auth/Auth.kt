@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +50,7 @@ import ru.plumsoftware.ui.core.resources.privacy_policy_title
 fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber: Boolean = true) {
 
     val viewModel = viewModel { AuthViewModel(authRepository = authRepository) }
+    val state by viewModel.state.collectAsState()
     var readPrivacyPolicy by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -66,6 +70,13 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
                 Effect.PrivacyPolicy -> {
                     navigator.navigate(route = Route.Auth.PRIVACY_POLICY)
                 }
+
+                is Effect.ShowSnackBar -> {
+                    state.snackbarHostState.showSnackbar(
+                        message = it.msg,
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
         }
     }
@@ -78,6 +89,11 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
                     viewModel.onEvent(Event.Back)
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = state.snackbarHostState,
+            )
         }
     ) {
         Column(
@@ -89,7 +105,7 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PrimaryTextInput(
-                startText = viewModel.state.value.phone,
+                startText = state.phone,
                 hint = stringResource(Res.string.enter_phone_hint),
                 visualTransformation = PhoneVisualTransformation(mask = "+0-000-000-00-00", maskNumber = '0'),
                 enabled = true,
@@ -98,7 +114,7 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
                 }
             )
             PrimaryTextInput(
-                startText = viewModel.state.value.password,
+                startText = state.password,
                 hint = stringResource(Res.string.enter_password_hint),
                 enabled = true,
                 onValueChange = {
@@ -109,7 +125,7 @@ fun Auth(navigator: Navigator, authRepository: AuthRepository, needConfirmNumber
             PrimaryButton(
                 text = stringResource(Res.string.continu),
                 enabled = readPrivacyPolicy,
-                isLoading = false,
+                isLoading = state.isLoading,
                 onClick = {
                     viewModel.onEvent(Event.Next)
                 }

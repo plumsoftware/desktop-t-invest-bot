@@ -43,7 +43,7 @@ fun main(): Unit = runBlocking {
     val authRepository = AuthRepository(
         client = client(),
         baseUrl = "http://127.0.0.1:8080",
-        accessToken = "SECRET",
+        accessToken = "SECRET", //TODO(remove token)
     )
 
     val settingsRepository = SettingsRepositoryImpl()

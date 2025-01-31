@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,13 +14,13 @@ import ru.plumsoftware.client.core.auth.AuthRepository
 import ru.plumsoftware.navigation.auth.auth.model.Effect
 import ru.plumsoftware.navigation.auth.auth.model.Event
 import ru.plumsoftware.navigation.auth.auth.model.State
+import ru.plumsoftware.net.core.model.receive.PasswordMatchReceive
 import ru.plumsoftware.net.core.model.response.UserResponseEither
 
 class AuthViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
-    private val state_ = MutableStateFlow(State.default())
-    val state = state_.asStateFlow()
+    val state = MutableStateFlow(State.default())
 
     val effect = MutableSharedFlow<Effect>()
 
@@ -30,16 +29,42 @@ class AuthViewModel(
     fun onEvent(event: Event) {
         when (event) {
             Event.Next -> {
-
                 viewModelScope.launch(context = supervisorIOContext) {
-                    val response = authRepository.getUserByPhone(phone = state_.value.phone.replace("+", ""))
-                    when(response) {
+                    withContext(Dispatchers.Main) {
+                        loading(true)
+                    }
+                    val response = try {
+                        authRepository.getUserByPhone(phone = state.value.phone)
+                    } catch (e: Exception) {
+                        UserResponseEither.Error(msg = e.message ?: "Error")
+                    }
+                    when (response) {
                         is UserResponseEither.Error -> {
-                            println("Error get user by phone is ${response.msg}")
-                        }
-                        is UserResponseEither.UserResponse -> {
+                            loading(false)
                             withContext(Dispatchers.Main) {
-                                effect.emit(Effect.Next)
+                                effect.emit(Effect.ShowSnackBar(msg = response.msg))
+                            }
+                        }
+
+                        is UserResponseEither.UserResponse -> {
+                            val id = response.id
+                            val passwordMatch = authRepository.getPasswordMatch(
+                                passwordMatchReceive = PasswordMatchReceive(
+                                    id = id,
+                                    password = state.value.password
+                                )
+                            )
+
+                            if (passwordMatch.value in 200..299) {
+                                loading(false)
+                                withContext(Dispatchers.Main) {
+                                    effect.emit(Effect.Next)
+                                }
+                            } else {
+                                loading(false)
+                                withContext(Dispatchers.Main) {
+                                    effect.emit(Effect.ShowSnackBar(msg = passwordMatch.description))
+                                }
                             }
                         }
                     }
@@ -47,13 +72,13 @@ class AuthViewModel(
             }
 
             is Event.OnPhoneChange -> {
-                state_.update {
+                state.update {
                     it.copy(phone = event.phone)
                 }
             }
 
             is Event.OnPasswordChange -> {
-                state_.update {
+                state.update {
                     it.copy(password = event.password)
                 }
             }
@@ -69,6 +94,12 @@ class AuthViewModel(
                     effect.emit(Effect.PrivacyPolicy)
                 }
             }
+        }
+    }
+
+    private fun loading(loading: Boolean) {
+        state.update {
+            it.copy(isLoading = loading)
         }
     }
 }
